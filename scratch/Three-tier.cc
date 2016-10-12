@@ -131,7 +131,7 @@ int
 	int num_group = (k/4);		// number of group of core switches
   int num_core = (k/2);		// number of core switch in a group
 	int total_host = k*k*k/4;	// number of hosts in the entire network	
-	char filename [] = "statistics/Fat-tree.xml";// filename for Flow Monitor xml output file
+	char filename [] = "statistics/Three-Tier.xml";// filename for Flow Monitor xml output file
 
 //   int totalHosts = total_host;
 //   int totalEdges = totalHosts/2;
@@ -178,7 +178,7 @@ int
 // 	std::cout << "Number of edge switch under each pod =  "<< num_edge<<"\n";
 // 	std::cout << "------------- "<<"\n";
   
-  	cout << "Total # of hosts:" << totalHosts << endl;
+  	cout << "Total # of hosts:" << total_host << endl;
   	cout << "------" << endl;
   
   
