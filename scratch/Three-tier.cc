@@ -128,8 +128,7 @@ int
 // 	int num_agg = (k/2);		// number of aggregation switch in a pod
 	int num_agg = (k/4);		// number of aggregation switch in a pod
 // 	int num_group = k/2;		// number of group of core switches
-	int num_group = (k/4);		// number of group of core switches
-  int num_core = (k/2);		// number of core switch in a group
+  	int num_core = (k/2);		// number of core switch in a group
 	int total_host = k*k*k/4;	// number of hosts in the entire network	
 	char filename [] = "statistics/Three-Tier.xml";// filename for Flow Monitor xml output file
 
@@ -226,8 +225,8 @@ int
 //   }
   
   
-	NodeContainer core[num_group];				// NodeContainer for core switches
-	for (i=0; i<num_group;i++){  	
+	NodeContainer core[1];				// NodeContainer for core switches
+	for (i=0; i<1;i++){  	
 		core[i].Create (num_core);
 		internet.Install (core[i]);		
 	}
@@ -369,16 +368,15 @@ int
 
 //=========== Connect core switches to aggregate switches ===========//
 //
-	NetDeviceContainer ca[num_group][num_core][num_pod]; 		
-	Ipv4InterfaceContainer ipCaContainer[num_group][num_core][num_pod];
+	NetDeviceContainer ca[num_agg][num_core][num_pod]; 		
+	Ipv4InterfaceContainer ipCaContainer[num_agg][num_core][num_pod];
 	int fourth_octet =1;
-	
-	for (i=0; i<num_group; i++){		
+	for (i=0; i<num_agg; i++){		
 		for (j=0; j < num_core; j++){
 			fourth_octet = 1;
 			for (h=0; h < num_pod; h++){			
 				// ca[i][j][h] = p2p.Install(core[i].Get(j), agg[h].Get(i)); 	
-        		ca[i][j][h] = p2p.Install(core[i].Get(j), agg[h].Get(i)); 	
+        		ca[i][j][h] = p2p.Install(core[0].Get(j), agg[h].Get(i)); 	
 
 				int second_octet = k+i;		
 				int third_octet = j;
