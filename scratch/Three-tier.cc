@@ -128,7 +128,7 @@ int
 // 	int num_agg = (k/2);		// number of aggregation switch in a pod
 	int num_agg = (k/4);		// number of aggregation switch in a pod
 // 	int num_group = k/2;		// number of group of core switches
-  	int num_core = (k/2);		// number of core switch in a group
+  	int num_core = (k/4);		// number of core switch in a group
 	int total_host = k*k*k/4;	// number of hosts in the entire network	
 	char filename [] = "statistics/Three-Tier.xml";// filename for Flow Monitor xml output file
 
@@ -246,7 +246,7 @@ int
 		internet.Install (bridge[i]);
 	}
 	NodeContainer host[num_pod][num_bridge];		// NodeContainer for hosts
-  for (i=0; i<k;i++){
+  	for (i=0; i<num_pod;i++){
 		for (j=0;j<num_bridge;j++){  	
 			host[i][j].Create (num_host);		
 			internet.Install (host[i][j]);
@@ -388,7 +388,7 @@ int
 				base = toString(0, 0, 0, fourth_octet);
 				address.SetBase (subnet, "255.255.255.0",base);
 				ipCaContainer[i][j][h] = address.Assign(ca[i][j][h]);
-				fourth_octet +=2;
+				fourth_octet += 4;
 			}
 		}
 	}
