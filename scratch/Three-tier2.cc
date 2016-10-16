@@ -39,8 +39,6 @@
 #include "ns3/ipv4-nix-vector-helper.h"
 #include "ns3/random-variable.h"
 
-using namespace std;
-
 /*
 	- This work goes along with the paper "Towards Reproducible Performance Studies of Datacenter Network Architectures Using An Open-Source Simulation Approach"
 
@@ -121,30 +119,22 @@ int
 //=========== Define parameters based on value of k ===========//
 //
 	int k = 4;			// number of ports per switch
-	int num_pod = k;		// number of pod
-	int num_host = (k/2);		// number of hosts under a switch
+	int num_pod = (k/2);		// number of pod
+	int num_host = (k);		// number of hosts under a switch
 	int num_edge = (k/2);		// number of edge switch in a pod
 	int num_bridge = num_edge;	// number of bridge in a pod
-// 	int num_agg = (k/2);		// number of aggregation switch in a pod
-	int num_agg = (k/4);		// number of aggregation switch in a pod
-// 	int num_group = k/2;		// number of group of core switches
-	int num_group = (k/4);		// number of group of core switches
-  int num_core = (k/2);		// number of core switch in a group
+	int num_agg = (k/2);		// number of aggregation switch in a pod
+	int num_group = 1;		// number of group of core switches
+        int num_core = (k/2);		// number of core switch in a group
 	int total_host = k*k*k/4;	// number of hosts in the entire network	
-	char filename [] = "statistics/Three-Tier.xml";// filename for Flow Monitor xml output file
+	char filename [] = "statistics/Three-tier2.xml";// filename for Flow Monitor xml output file
 
-//   int totalHosts = total_host;
-//   int totalEdges = totalHosts/2;
-//   int totalAggrs = totalEdges/2;
-//   int totalCores = totalAggrs/2;
-  
-  
 // Define variables for On/Off Application
 // These values will be used to serve the purpose that addresses of server and client are selected randomly
 // Note: the format of host's address is 10.pod.switch.(host+2)
 //
 	int podRand = 0;	//	
-	int swRand = 0;		// Random values for servers' address, switch
+	int swRand = 0;		// Random values for servers' address
 	int hostRand = 0;	//
 
 	int rand1 =0;		//
@@ -172,16 +162,14 @@ int
 	
 // Output some useful information
 //	
- 	std::cout << "Value of k =  "<< k<<"\n";
- 	std::cout << "Total number of hosts =  "<< total_host<<"\n";
- 	std::cout << "Number of hosts under each switch =  "<< num_host<<"\n";
- 	std::cout << "Number of edge switch under each pod =  "<< num_edge<<"\n";
- 	std::cout << "------------- "<<"\n";
-  
-  	cout << "Total # of hosts:" << total_host << endl;
+	std::cout << "Value of k =  "<< k<<"\n";
+	std::cout << "Total number of hosts =  "<< total_host<<"\n";
+	std::cout << "Number of hosts under each switch =  "<< num_host<<"\n";
+	std::cout << "Number of edge switch under each pod =  "<< num_edge<<"\n";
+	std::cout << "------------- "<<"\n";
+
+	cout << "Total # of hosts:" << total_host << endl;
   	cout << "------" << endl;
-  
-  
 
 // Initialize Internet Stack and Routing Protocols
 //	
@@ -193,66 +181,46 @@ int
 	list.Add (nixRouting, 10);	
 	internet.SetRoutingHelper(list);
 
+	cout << "Finished Internet Stack and Routing Protocols" << endl;
+
 //=========== Creation of Node Containers ===========//
 //
-//   NodeContainer core[totalCores];
-//   for (int i = 0; i < totalCores; i++) {
-//   	core[i].Create(1);
-//     internet.Install(core[i]);
-//   }
-  
-//  	NodeContainer agg[totalAggrs];
-//   for (int i = 0; i < totalAggrs; i++) {
-//   	agg[i].Create(1);
-//     internet.Install(agg[i]);
-//   }
-  
-//   NodeContainer edge[totalEdges];
-//   for (int i = 0; i < totalEdges; i++) {
-//   	edge[i].Create(1);
-//     internet.Install(edge[i]);
-//   }
-  
-//   NodeContainer bridge[totalHosts];
-//   for (int i = 0; i < totalHosts; i++) {
-//   	bridge[i].Create(1);
-//     internet.Install(bridge[i]);
-//   }
-  
-//   NodeContainer host[totalHosts];
-//   for (int i = 0; i < totalHosts; i++) {
-//   	host[i].Create(1);
-//     internet.Install(host[i]);
-//   }
-  
-  
 	NodeContainer core[num_group];				// NodeContainer for core switches
 	for (i=0; i<num_group;i++){  	
 		core[i].Create (num_core);
 		internet.Install (core[i]);		
 	}
+	cout << "core" << endl;
 	NodeContainer agg[num_pod];				// NodeContainer for aggregation switches
 	for (i=0; i<num_pod;i++){  	
 		agg[i].Create (num_agg);
 		internet.Install (agg[i]);
 	}
+	cout << "agg" << endl;
 	NodeContainer edge[num_pod];				// NodeContainer for edge switches
   	for (i=0; i<num_pod;i++){  	
 		edge[i].Create (num_bridge);
 		internet.Install (edge[i]);
 	}
+	cout << "edge" << endl;
 	NodeContainer bridge[num_pod];				// NodeContainer for edge bridges
   	for (i=0; i<num_pod;i++){  	
 		bridge[i].Create (num_bridge);
 		internet.Install (bridge[i]);
 	}
+	cout << "bridge" << endl;
+
 	NodeContainer host[num_pod][num_bridge];		// NodeContainer for hosts
-  for (i=0; i<k;i++){
+  	for (i=0; i<num_pod;i++){
 		for (j=0;j<num_bridge;j++){  	
 			host[i][j].Create (num_host);		
 			internet.Install (host[i][j]);
 		}
 	}
+
+	cout << "host" << endl; 
+
+	cout << "Finished Creation of Node Containers" << endl;
 
 //=========== Initialize settings for On/Off Application ===========//
 //
@@ -377,8 +345,7 @@ int
 		for (j=0; j < num_core; j++){
 			fourth_octet = 1;
 			for (h=0; h < num_pod; h++){			
-				// ca[i][j][h] = p2p.Install(core[i].Get(j), agg[h].Get(i)); 	
-        		ca[i][j][h] = p2p.Install(core[i].Get(j), agg[h].Get(i)); 	
+				ca[i][j][h] = p2p.Install(core[i].Get(j), agg[h].Get(i)); 	
 
 				int second_octet = k+i;		
 				int third_octet = j;
@@ -390,7 +357,7 @@ int
 				base = toString(0, 0, 0, fourth_octet);
 				address.SetBase (subnet, "255.255.255.0",base);
 				ipCaContainer[i][j][h] = address.Assign(ca[i][j][h]);
-				fourth_octet +=2;
+				fourth_octet +=4;
 			}
 		}
 	}
