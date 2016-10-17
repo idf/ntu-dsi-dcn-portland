@@ -33,7 +33,7 @@ from waflib import Utils, Logs
 from waflib.Configure import conf
 from waflib.Errors import WafError
 
-BOOST_LIBS = ('/usr/lib', '/usr/local/lib',
+BOOST_LIBS = ('/usr/lib/x86_64-linux-gnu', '/usr/lib/i386-linux-gnu', '/usr/lib', '/usr/local/lib',
 			  '/opt/local/lib', '/sw/lib', '/lib')
 BOOST_INCLUDES = ('/usr/include', '/usr/local/include',
 				  '/opt/local/include', '/sw/include')
