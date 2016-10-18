@@ -481,6 +481,18 @@ protected:
   LearnState_t m_learnState;            ///< Learned state data.
 };
 
+class FabricController : public Controller {
+public:
+  static TypeId GetTypeId(void);
+
+  virtual ~FabricController() {
+
+  }
+
+  void ReceiveFromSwitch(Ptr<OpenFlowSwitchNetDevice> swtch, ofpbuf* buffer);
+
+};
+
 /**
  * \brief Executes a list of flow table actions.
  *

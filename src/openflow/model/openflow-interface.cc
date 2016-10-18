@@ -777,6 +777,24 @@ TypeId LearningController::GetTypeId (void)
   return tid;
 }
 
+TypeId FabricController::GetTypeId (void)
+{
+  static TypeId tid = TypeId ("ns3::ofi::FabricController")
+    .SetParent (Controller::GetTypeId ())
+    .AddConstructor<FabricController> ();
+  return tid;
+}
+
+void FabricController::ReceiveFromSwitch(Ptr<OpenFlowSwitchNetDevice> swtch, ofpbuf* buffer) {
+  if (m_switches.find(swtch) == m_switches.end()) {
+    NS_LOG_ERROR("Portland Fabric Controller: Can't receive from this switch, not registered to the Controller.");
+    return;
+  }
+  // TODO: Hardcode the IP->PMAC mapping here.
+  
+  return;
+}
+
 void
 LearningController::ReceiveFromSwitch (Ptr<OpenFlowSwitchNetDevice> swtch, ofpbuf* buffer)
 {
