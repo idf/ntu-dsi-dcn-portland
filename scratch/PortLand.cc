@@ -304,11 +304,13 @@ int
 //=========== Connect aggregate switches to edge switches ===========//
 //
 	NetDeviceContainer ae[num_pod][num_agg][num_edge]; 	
+	NetDeviceContainer aggSw[num_pod][num_agg][num_edge];
 	// Ipv4InterfaceContainer ipAeContainer[num_pod][num_agg][num_edge];
 	for (i=0;i<num_pod;i++){
 		for (j=0;j<num_agg;j++){
 			for (h=0;h<num_edge;h++){
-				ae[i][j][h] = p2p.Install(agg[i].Get(j), edge[i].Get(h));
+				ae[i][j][h] = csma.Install(NodeContainer (agg[i].Get(j), edge[i].Get(h)));
+				aggSw[i][j][h].Add(ae[i][j][h].Get(0));
 
 				// int second_octet = i;		
 				// int third_octet = j+(k/2);	
@@ -329,7 +331,7 @@ int
 	 		    OpenFlowSwitchHelper swtch;
 
 	 		    Ptr<ns3::ofi::LearningController> controller = CreateObject<ns3::ofi::LearningController> ();
-	        	swtch.Install (switchNode, ae[i][j][h], controller);
+	        	swtch.Install (switchNode, aggSw[i][j][h], controller);
 			}			
 		}		
 	}
@@ -337,7 +339,8 @@ int
 
 //=========== Connect core switches to aggregate switches ===========//
 //
-	NetDeviceContainer ca[num_group][num_core][num_pod]; 		
+	NetDeviceContainer ca[num_group][num_core][num_pod]; 	
+	NetDeviceContainer coreSw[num_group][num_core][num_pod];
 	// Ipv4InterfaceContainer ipCaContainer[num_group][num_core][num_pod];
 	// int fourth_octet =1;
 	
@@ -345,8 +348,8 @@ int
 		for (j=0; j < num_core; j++){
 			// fourth_octet = 1;
 			for (h=0; h < num_pod; h++){			
-				ca[i][j][h] = p2p.Install(core[i].Get(j), agg[h].Get(i)); 	
-
+				ca[i][j][h] = csma.Install(NodeContainer (core[i].Get(j), agg[h].Get(i))); 	
+				coreSw[i][j][h].Add(ca[i][j][h].Get(0));
 				// int second_octet = k+i;		
 				// int third_octet = j;
 				// //Assign subnet
@@ -365,7 +368,7 @@ int
 	 		    OpenFlowSwitchHelper swtch;
 
 	 		    Ptr<ns3::ofi::LearningController> controller = CreateObject<ns3::ofi::LearningController> ();
-	        	swtch.Install (switchNode, ca[i][j][h], controller);
+	        	swtch.Install (switchNode, coreSw[i][j][h], controller);
 			}
 		}
 	}
