@@ -171,7 +171,7 @@ int
 
 // Initialize Internet Stack and Routing Protocols
 //	
-	// InternetStackHelper internet;
+	InternetStackHelper internet;
 	// Ipv4NixVectorHelper nixRouting; 
 	// Ipv4StaticRoutingHelper staticRouting;
 	// Ipv4ListRoutingHelper list;
@@ -184,28 +184,28 @@ int
 	NodeContainer core[num_group];				// NodeContainer for core switches
 	for (i=0; i<num_group;i++){  	
 		core[i].Create (num_core);
-		// internet.Install (core[i]);		
+		internet.Install (core[i]);		
 	}
 	NodeContainer agg[num_pod];				// NodeContainer for aggregation switches
 	for (i=0; i<num_pod;i++){  	
 		agg[i].Create (num_agg);
-		// internet.Install (agg[i]);
+		internet.Install (agg[i]);
 	}
 	NodeContainer edge[num_pod];				// NodeContainer for edge switches
   	for (i=0; i<num_pod;i++){  	
 		edge[i].Create (num_bridge);
-		// internet.Install (edge[i]);
+		internet.Install (edge[i]);
 	}
 	NodeContainer bridge[num_pod];				// NodeContainer for edge bridges
   	for (i=0; i<num_pod;i++){  	
 		bridge[i].Create (num_bridge);
-		// internet.Install (bridge[i]);
+		internet.Install (bridge[i]);
 	}
 	NodeContainer host[num_pod][num_bridge];		// NodeContainer for hosts
   	for (i=0; i<k;i++){
 		for (j=0;j<num_bridge;j++){  	
 			host[i][j].Create (num_host);		
-			// internet.Install (host[i][j]);
+			internet.Install (host[i][j]);
 
 		}
 	}
@@ -253,13 +253,13 @@ int
 
 // Inintialize Address Helper
 //	
-  	// Ipv4AddressHelper address;
+  	Ipv4AddressHelper address;
 
 // Initialize PointtoPoint helper
 //	
-	PointToPointHelper p2p;
-  	p2p.SetDeviceAttribute ("DataRate", StringValue (dataRate));
-  	p2p.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (delay)));
+	// PointToPointHelper p2p;
+ //  	p2p.SetDeviceAttribute ("DataRate", StringValue (dataRate));
+ //  	p2p.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (delay)));
 
 // Initialize Csma helper
 //
@@ -271,7 +271,7 @@ int
 //	
 	NetDeviceContainer hostSw[num_pod][num_bridge];		
 	NetDeviceContainer bridgeDevices[num_pod][num_bridge];	
-	// Ipv4InterfaceContainer ipContainer[num_pod][num_bridge];
+	Ipv4InterfaceContainer ipContainer[num_pod][num_bridge];
 
 	for (i=0;i<num_pod;i++){
 		for (j=0;j<num_bridge; j++){
@@ -296,10 +296,10 @@ int
 			BridgeHelper bHelper;
 			bHelper.Install (bridge[i].Get(j), bridgeDevices[i][j]);
 			//Assign address
-			// char *subnet;
-			// subnet = toString(10, i, j, 0);
-			// address.SetBase (subnet, "255.255.255.0");
-			// ipContainer[i][j] = address.Assign(hostSw[i][j]);			
+			char *subnet;
+			subnet = toString(10, i, j, 0);
+			address.SetBase (subnet, "255.255.255.0");
+			ipContainer[i][j] = address.Assign(hostSw[i][j]);			
 
 		}
 	}
