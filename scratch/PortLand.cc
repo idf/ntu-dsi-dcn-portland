@@ -81,6 +81,22 @@ using namespace ns3;
 using namespace std;
 NS_LOG_COMPONENT_DEFINE ("PortLand-Architecture");
 
+// Function to create MAC address string from numbers
+//
+
+char * toPMAC(int pod, int position, int port, int vmid){
+    char *macAddress = new char[18];
+
+    if(pod <= 0xff && vmid <= 0xff)
+        sprintf(macAddress, "00:%02x:%02x:%02x:00:%02x", pod, position, port, vmid);
+    else
+        // Not implemented yet.
+        exit(1);
+
+    return macAddress;
+}
+
+
 // Function to create address string from numbers
 //
 char * toString(int a,int b, int c, int d){
@@ -284,7 +300,8 @@ int
 				hostSw[i][j].Add(link2.Get(0));			
 				bridgeDevices[i][j].Add(link2.Get(1));
 
-				link2.Get(1)->SetAddress(Mac48Address("11:22:33:44:55:66"));
+				link2.Get(1)->SetAddress(Mac48Address(toPMAC(i, j, h, 1)));
+				// link2.Get(1)->SetAddress(Mac48Address("11:22:33:44:55:66"));
 			}
 			// add switch
 			Ptr<Node> switchNode = edge[i].Get (j);
