@@ -206,6 +206,7 @@ int
 		for (j=0;j<num_bridge;j++){  	
 			host[i][j].Create (num_host);		
 			// internet.Install (host[i][j]);
+
 		}
 	}
 
@@ -281,7 +282,9 @@ int
 			for (h=0; h< num_host;h++){			
 				NetDeviceContainer link2 = csma.Install (NodeContainer (host[i][j].Get(h), bridge[i].Get(j)));
 				hostSw[i][j].Add(link2.Get(0));			
-				bridgeDevices[i][j].Add(link2.Get(1));						
+				bridgeDevices[i][j].Add(link2.Get(1));
+
+				link2.Get(1)->SetAddress(Mac48Address("11:22:33:44:55:66"));
 			}
 			// add switch
 			Ptr<Node> switchNode = edge[i].Get (j);
@@ -297,6 +300,7 @@ int
 			// subnet = toString(10, i, j, 0);
 			// address.SetBase (subnet, "255.255.255.0");
 			// ipContainer[i][j] = address.Assign(hostSw[i][j]);			
+
 		}
 	}
 	std::cout << "Finished connecting edge switches and hosts  "<< "\n";
