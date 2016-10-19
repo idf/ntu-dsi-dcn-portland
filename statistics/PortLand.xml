@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<FlowMonitor>
+  <FlowStats>
+    <Flow flowId="1" timeFirstTxPacket="+210881120.0ns" timeFirstRxPacket="+0.0ns" timeLastTxPacket="+99266183007.0ns" timeLastRxPacket="+0.0ns" delaySum="+0.0ns" jitterSum="+0.0ns" lastDelay="+0.0ns" txBytes="7004216" rxBytes="0" txPackets="6658" rxPackets="0" lostPackets="5985" timesForwarded="0">
+      <delayHistogram nBins="0" >
+      </delayHistogram>
+      <jitterHistogram nBins="0" >
+      </jitterHistogram>
+      <packetSizeHistogram nBins="0" >
+      </packetSizeHistogram>
+      <flowInterruptionsHistogram nBins="0" >
+      </flowInterruptionsHistogram>
+    </Flow>
+  </FlowStats>
+  <Ipv4FlowClassifier>
+    <Flow flowId="1" sourceAddress="10.0.0.1" destinationAddress="10.0.0.3" protocol="17" sourcePort="49153" destinationPort="9" />
+  </Ipv4FlowClassifier>
+  <FlowProbes>
+    <FlowProbe index="0">
+      <FlowStats  flowId="1" packets="6658" bytes="7004216" delayFromFirstProbeSum="+0.0ns" >
+      </FlowStats>
+    </FlowProbe>
+    <FlowProbe index="1">
+    </FlowProbe>
+    <FlowProbe index="2">
+    </FlowProbe>
+    <FlowProbe index="3">
+    </FlowProbe>
+    <FlowProbe index="4">
+    </FlowProbe>
+    <FlowProbe index="5">
+    </FlowProbe>
+    <FlowProbe index="6">
+    </FlowProbe>
+    <FlowProbe index="7">
+    </FlowProbe>
+    <FlowProbe index="8">
+    </FlowProbe>
+    <FlowProbe index="9">
+    </FlowProbe>
+    <FlowProbe index="10">
+    </FlowProbe>
+    <FlowProbe index="11">
+    </FlowProbe>
+    <FlowProbe index="12">
+    </FlowProbe>
+    <FlowProbe index="13">
+    </FlowProbe>
+    <FlowProbe index="14">
+    </FlowProbe>
+    <FlowProbe index="15">
+    </FlowProbe>
+  </FlowProbes>
+</FlowMonitor>
