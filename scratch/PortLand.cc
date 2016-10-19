@@ -300,7 +300,7 @@ int
 				hostSw[i][j].Add(link2.Get(0));			
 				bridgeDevices[i][j].Add(link2.Get(1));
 
-				link2.Get(1)->SetAddress(Mac48Address(toPMAC(i, j, h, 0)));
+				link2.Get(1)->SetAddress(Mac48Address(toPMAC(i, j, h, 1)));
 				// link2.Get(1)->SetAddress(Mac48Address("11:22:33:44:55:66"));
 			}
 			// add switch
