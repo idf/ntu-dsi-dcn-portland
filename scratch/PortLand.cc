@@ -148,14 +148,14 @@ int
 	}
 	NodeContainer edge[num_pod];				// NodeContainer for edge switches
   	for (i=0; i<num_pod;i++){  	
-		edge[i].Create (num_bridge);
+		edge[i].Create (num_edge);
 		// internet.Install (edge[i]);
 	}
-	NodeContainer bridge[num_pod];				// NodeContainer for edge bridges
-  	for (i=0; i<num_pod;i++){  	
-		bridge[i].Create (num_bridge);
-		internet.Install (bridge[i]);
-	}
+	// NodeContainer bridge[num_pod];				// NodeContainer for edge bridges
+ //  	for (i=0; i<num_pod;i++){  	
+	// 	bridge[i].Create (num_bridge);
+	// 	internet.Install (bridge[i]);
+	// }
 	NodeContainer host[num_pod][num_bridge];		// NodeContainer for hosts
 	for (i=0; i<k;i++){
 		for (j=0;j<num_bridge;j++){  	
@@ -223,22 +223,26 @@ int
 
 //=========== Connect edge switches to hosts ===========//
 //	
-	NetDeviceContainer hostSw[num_pod][num_bridge];		
-	NetDeviceContainer bridgeDevices[num_pod][num_bridge];	
-	Ipv4InterfaceContainer ipContainer[num_pod][num_bridge];
+	NetDeviceContainer hostSw[num_pod][num_edge];		
+	// NetDeviceContainer bridgeDevices[num_pod][num_bridge];	
+	NetDeviceContainer hostDevices[num_pod][num_edge];
+	Ipv4InterfaceContainer ipContainer[num_pod][num_edge];
 
 	for (i=0;i<num_pod;i++){
-		for (j=0;j<num_bridge; j++){
-			NetDeviceContainer link1 = csma.Install(NodeContainer (edge[i].Get(j), bridge[i].Get(j)));
-			hostSw[i][j].Add(link1.Get(0));				
-			bridgeDevices[i][j].Add(link1.Get(1));			
+		for (j=0;j<num_edge; j++){
+			// NetDeviceContainer link1 = csma.Install(NodeContainer (edge[i].Get(j), bridge[i].Get(j)));
+			// hostSw[i][j].Add(link1.Get(0));				
+			// bridgeDevices[i][j].Add(link1.Get(1));			
+			NetDeviceContainer link1;
+			for (h=0; h< num_host;h++){		
+				link1 = csma.Install(NodeContainer (edge[i].Get(j), host[i][j].Get(h)));
+				hostSw[i][j].Add(link1.Get(0));  // duplication?
+				// NetDeviceContainer link2 = csma.Install (NodeContainer (host[i][j].Get(h), bridge[i].Get(j)));
+				// hostSw[i][j].Add(link2.Get(0));			
+				// bridgeDevices[i][j].Add(link2.Get(1));
+				hostDevices[i][j].Add(link1.Get(1));
 
-			for (h=0; h< num_host;h++){			
-				NetDeviceContainer link2 = csma.Install (NodeContainer (host[i][j].Get(h), bridge[i].Get(j)));
-				hostSw[i][j].Add(link2.Get(0));			
-				bridgeDevices[i][j].Add(link2.Get(1));
-
-				link2.Get(1)->SetAddress(Mac48Address(toPMAC(i, j, h, 1)));
+				link1.Get(1)->SetAddress(Mac48Address(toPMAC(i, j, h, 1)));
 				// link2.Get(1)->SetAddress(Mac48Address("11:22:33:44:55:66"));
 			}
 			// add switch
@@ -248,14 +252,14 @@ int
  		    Ptr<ns3::ofi::LearningController> controller = CreateObject<ns3::ofi::LearningController> ();
         	swtch.Install (switchNode, hostSw[i][j], controller);
 
-			BridgeHelper bHelper;
-			bHelper.Install (bridge[i].Get(j), bridgeDevices[i][j]);
+			// BridgeHelper bHelper;
+			// bHelper.Install (bridge[i].Get(j), bridgeDevices[i][j]);
 			//Assign address
 			char *subnet;
 			subnet = toString(10, i, j, 0);
 			address.SetBase (subnet, "255.255.255.0");
 			// ipContainer[i][j] = address.Assign(hostSw[i][j]);	
-			ipContainer[i][j] = address.Assign(bridgeDevices[i][j]);		
+			ipContainer[i][j] = address.Assign(hostDevices[i][j]);		
 		}
 	}
 	std::cout << "Finished connecting edge switches and hosts  "<< "\n";
