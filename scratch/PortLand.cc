@@ -1,26 +1,3 @@
-// Construction of PortLand Architecture
-// Authors: Linh Vu, Daji Wong
-
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
-/*
- * Copyright (c) 2013 Nanyang Technological University 
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation;
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * Authors: Linh Vu <linhvnl89@gmail.com>, Daji Wong <wong0204@e.ntu.edu.sg>
- */
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -40,50 +17,12 @@
 #include "ns3/random-variable.h"
 #include "ns3/openflow-module.h"
 
-/*
-	- This work goes along with the paper "Towards Reproducible Performance Studies of Datacenter Network Architectures Using An Open-Source Simulation Approach"
-
-	- The code is constructed in the following order:
-		1. Creation of Node Containers 
-		2. Initialize settings for On/Off Application
-		3. Connect hosts to edge switches
-		4. Connect edge switches to aggregate switches
-		5. Connect aggregate switches to core switches
-		6. Start Simulation
-
-	- Addressing scheme:
-		1. Address of host: 10.pod.switch.0 /24
-		2. Address of edge and aggregation switch: 10.pod.switch.0 /16
-		3. Address of core switch: 10.(group number + k).switch.0 /8
-		   (Note: there are k/2 group of core switch)
-
-	- On/Off Traffic of the simulation: addresses of client and server are randomly selected everytime
-	
-	- Simulation Settings:
-                - Number of pods (k): 4-24 (run the simulation with varying values of k)
-                - Number of nodes: 16-3456
-		- Simulation running time: 100 seconds
-		- Packet size: 1024 bytes
-		- Data rate for packet sending: 1 Mbps
-		- Data rate for device channel: 1000 Mbps
-		- Delay time for device: 0.001 ms
-		- Communication pairs selection: Random Selection with uniform probability
-		- Traffic flow pattern: Exponential random traffic
-		- Routing protocol: Nix-Vector
-
-        - Statistics Output:
-                - Flowmonitor XML output file: PortLand.xml is located in the /statistics folder
-            
-
-*/
-
 using namespace ns3;
 using namespace std;
 NS_LOG_COMPONENT_DEFINE ("PortLand-Architecture");
 
 // Function to create MAC address string from numbers
 //
-
 char * toPMAC(int pod, int position, int port, int vmid){
     char *macAddress = new char[18];
 
@@ -142,7 +81,7 @@ int
 	int num_bridge = num_edge;	// number of bridge in a pod
 	int num_agg = (k/2);		// number of aggregation switch in a pod
 	int num_group = k/2;		// number of group of core switches
-        int num_core = (k/2);		// number of core switch in a group
+	int num_core = (k/2);		// number of core switch in a group
 	int total_host = k*k*k/4;	// number of hosts in the entire network	
 	char filename [] = "statistics/PortLand.xml";// filename for Flow Monitor xml output file
 
@@ -200,17 +139,17 @@ int
 	NodeContainer core[num_group];				// NodeContainer for core switches
 	for (i=0; i<num_group;i++){  	
 		core[i].Create (num_core);
-		internet.Install (core[i]);		
+		// internet.Install (core[i]);		
 	}
 	NodeContainer agg[num_pod];				// NodeContainer for aggregation switches
 	for (i=0; i<num_pod;i++){  	
 		agg[i].Create (num_agg);
-		internet.Install (agg[i]);
+		// internet.Install (agg[i]);
 	}
 	NodeContainer edge[num_pod];				// NodeContainer for edge switches
   	for (i=0; i<num_pod;i++){  	
 		edge[i].Create (num_bridge);
-		internet.Install (edge[i]);
+		// internet.Install (edge[i]);
 	}
 	NodeContainer bridge[num_pod];				// NodeContainer for edge bridges
   	for (i=0; i<num_pod;i++){  	
@@ -218,11 +157,10 @@ int
 		internet.Install (bridge[i]);
 	}
 	NodeContainer host[num_pod][num_bridge];		// NodeContainer for hosts
-  	for (i=0; i<k;i++){
+	for (i=0; i<k;i++){
 		for (j=0;j<num_bridge;j++){  	
 			host[i][j].Create (num_host);		
 			internet.Install (host[i][j]);
-
 		}
 	}
 
@@ -316,8 +254,8 @@ int
 			char *subnet;
 			subnet = toString(10, i, j, 0);
 			address.SetBase (subnet, "255.255.255.0");
-			ipContainer[i][j] = address.Assign(hostSw[i][j]);			
-
+			// ipContainer[i][j] = address.Assign(hostSw[i][j]);	
+			ipContainer[i][j] = address.Assign(bridgeDevices[i][j]);		
 		}
 	}
 	std::cout << "Finished connecting edge switches and hosts  "<< "\n";
