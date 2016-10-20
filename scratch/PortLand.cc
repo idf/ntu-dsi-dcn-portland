@@ -66,6 +66,12 @@ char *toString(int a, int b, int c, int d) {
   return address;
 }
 
+// Fabric Manager
+typedef map<Mac48Address, Ipv4Address> MacIpMap;
+typedef map<Ipv4Address, Mac48Address> IpMacMap;
+MacIpMap macIpMap;
+IpMacMap ipMacMap;
+
 // Main function
 //
 int main(int argc, char *argv[]) {
@@ -248,13 +254,18 @@ int main(int argc, char *argv[]) {
         // bridgeDevices[i][j].Add(link2.Get(1));
         hostDevices[i][j].Add(link1.Get(1));
 
-        link1.Get(1)->SetAddress(Mac48Address(toPMAC(i, j, h, 1)));
-        // link2.Get(1)->SetAddress(Mac48Address("11:22:33:44:55:66"));
+        // Assign PMAC
+        Mac48Address pmac = Mac48Address(toPMAC(i, j, h, 1));
+        Ipv4Address ip = Ipv4Address(toString(10, i, j, h));
+        link1.Get(1)->SetAddress(pmac);
+        macIpMap.insert(pair<Mac48Address, Ipv4Address>(pmac, ip));
+        ipMacMap.insert(pair<Ipv4Address, Mac48Address>(ip, pmac));
       }
       // add switch
       Ptr<Node> switchNode = edge[i].Get(j);
       OpenFlowSwitchHelper swtch;
 
+      // TODO pass position of the switch.
       Ptr<ns3::ofi::LearningController> controller =
           CreateObject<ns3::ofi::LearningController>();
       swtch.Install(switchNode, hostSw[i][j], controller);
@@ -265,7 +276,7 @@ int main(int argc, char *argv[]) {
       char *subnet;
       subnet = toString(10, i, j, 0);
       address.SetBase(subnet, "255.255.255.0");
-      // ipContainer[i][j] = address.Assign(hostSw[i][j]);
+      // incremental assigned
       ipContainer[i][j] = address.Assign(hostDevices[i][j]);
     }
   }
