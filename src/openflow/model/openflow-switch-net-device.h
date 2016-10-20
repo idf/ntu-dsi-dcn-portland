@@ -461,6 +461,8 @@ private:
    */
   void FlowTableLookup (sw_flow_key key, ofpbuf* buffer, uint32_t packet_uid, int port, bool send_to_controller);
 
+  void PortlandFlowTableLookup(sw_flow_key key, ofpbuf* buffer, uint32_t packet_uid, int port, bool send_to_controller);
+
   /**
    * \internal
    *
@@ -544,6 +546,13 @@ private:
 
   sw_chain *m_chain;             ///< Flow Table; forwarding rules.
   vport_table_t m_vportTable;    ///< Virtual Port Table
+
+  // Portland related vars.
+  int switch_id;  // Unique switch id.
+  int pod;  // Pod number.
+  int pos;  // Position of edge switch in each pod.
+  int level; // Level of the switch: 0, 1 or 2.
+  std::map<int, bool> port_dir; // Port direction. True -> Up, False->Down
 };
 
 } // namespace ns3

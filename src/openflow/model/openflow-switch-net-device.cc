@@ -948,6 +948,31 @@ OpenFlowSwitchNetDevice::SendErrorMsg (uint16_t type, uint16_t code, const void 
   SendOpenflowBuffer (buffer);
 }
 
+void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* buffer, uint32_t packet_uid, int port, bool send_to_controller) {
+  // For portland switch, we don't lookup flow table, 
+  // instead, we forwarding the packet according to its PMAC and current switch's location.
+  NS_LOG_INFO("Portland switch: forwarding packet using PMAC and my location.");
+
+  // Get the correct port to send this packet.
+  uint32_t output_port = -1;  // TBA
+  sw_flow_key my_key;
+  my_key.wildcards = 0;
+  flow_extract (buffer, -1, &my_key.flow);   // Second par isn't important: we don't care about in-port.
+  Mac48Address dst_addr;
+  dst_addr.CopyFrom (my_key.flow.dl_dst);   // Here we got the PMAC.
+  
+  // TODO: Analyze the PMAC and switch location to get the output port.
+
+  // Create action.
+  ofp_action_output actions[1];
+  actions[0].type = htons (OFPAT_OUTPUT);
+  actions[0].len = 16;
+  actions[0].port = output_port;
+
+  // Forwarding package.
+  ofi::ExecuteActions(this, packet_uid, buffer, &key, (ofp_action_header *)actions, 16, false);
+}
+
 void
 OpenFlowSwitchNetDevice::FlowTableLookup (sw_flow_key key, ofpbuf* buffer, uint32_t packet_uid, int port, bool send_to_controller)
 {
