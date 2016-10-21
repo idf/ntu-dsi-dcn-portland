@@ -45,6 +45,9 @@
 
 #include <map>
 #include <set>
+#include <vector>
+#include <utility>
+#include <stdlib.h>
 
 #include "openflow-interface.h"
 
@@ -548,11 +551,11 @@ private:
   vport_table_t m_vportTable;    ///< Virtual Port Table
 
   // Portland related vars.
-  int switch_id;  // Unique switch id.
-  int pod;  // Pod number.
-  int pos;  // Position of edge switch in each pod.
-  int level; // Level of the switch: 0, 1 or 2.
-  std::map<int, bool> port_dir; // Port direction. True -> Up, False->Down
+  int m_switch_id;  // Unique switch id.
+  int m_pod;  // Pod number.
+  int m_pos;  // Position of edge switch in each pod.
+  int m_level; // Level of the switch: 0, 1 or 2.
+  std::map<int, bool> m_port_dir; // Port direction. True -> Up, False->Down
 };
 
 } // namespace ns3

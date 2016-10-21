@@ -953,15 +953,61 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
   // instead, we forwarding the packet according to its PMAC and current switch's location.
   NS_LOG_INFO("Portland switch: forwarding packet using PMAC and my location.");
 
-  // Get the correct port to send this packet.
-  uint32_t output_port = -1;  // TBA
+  // Get the destination PMAC of this package.
   sw_flow_key my_key;
   my_key.wildcards = 0;
-  flow_extract (buffer, -1, &my_key.flow);   // Second par isn't important: we don't care about in-port.
+  flow_extract (buffer, -1, &my_key.flow);   // The second par isn't important: we don't care about in-port.
   Mac48Address dst_addr;
-  dst_addr.CopyFrom (my_key.flow.dl_dst);   // Here we got the PMAC.
-  
-  // TODO: Analyze the PMAC and switch location to get the output port.
+  dst_addr.CopyFrom (my_key.flow.dl_dst);
+  uint8_t pmac[6];
+  dst_addr.CopyTo(pmac);
+
+  // Extract dst position info from PMAC.
+  int dst_pod = (((int)pmac[0]) << 6 ) + (int)pmac[1];
+  int dst_pos = (int)pmac[2];
+  int dst_port = (int)pmac[3];
+  // int dst_umid = (((int)pmac[4]) << 6 ) + (int)pmac[5]; // No use right now.
+
+  // Construct the out-port for the package.
+  uint32_t output_port = -1;
+  if(m_level == 2) {     // Core switch.
+    output_port = dst_pod;
+
+  } else if(m_level == 1) {    // Agg switch.
+    if(m_pod == dst_pod) {
+      // In the same pod. Just send it to the right edge switch.
+      // TODO: How agg switch's port is orgnized?  
+
+    } else {
+      // Not in a same pod. Shoud send to core switch.
+      std::vector<int> potential_ports;
+      for(std::map<int, bool>::iterator itr = m_port_dir.begin(); itr != m_port_dir.end(); itr++) {
+        if(itr->second == true) {
+          potential_ports.push_back(itr->first);
+        }
+      }
+      size_t random_idx = rand() % potential_ports.size();
+      output_port = potential_ports[random_idx];  // Load balance here.
+    }
+
+  } else if(m_level == 0) {     // Edge switch.
+    if(dst_pod != m_pod || dst_pos != m_pos) {
+      // Not in a same pod or not in same edge switch. Shoud send to agg switch.
+      std::vector<int> potential_ports;
+      for(std::map<int, bool>::iterator itr = m_port_dir.begin(); itr != m_port_dir.end(); itr++) {
+        if(itr->second == true) {
+          potential_ports.push_back(itr->first);
+        }
+      }
+      size_t random_idx = rand() % potential_ports.size();
+      output_port = potential_ports[random_idx];  // Load balance here.
+    } else {
+      // In same pod and same edge switch.
+      output_port = dst_port;
+    }
+  } else {
+    NS_LOG_INFO("Portland switch: WTF the level of this switch is neither 0, 1 nor 2.");
+  }
 
   // Create action.
   ofp_action_output actions[1];
@@ -1043,6 +1089,9 @@ OpenFlowSwitchNetDevice::RunThroughFlowTable (uint32_t packet_uid, int port, boo
 
   NS_LOG_INFO ("Matching against the flow table.");
   Simulator::Schedule (m_lookupDelay, &OpenFlowSwitchNetDevice::FlowTableLookup, this, key, buffer, packet_uid, port, send_to_controller);
+
+  // Use code below to run the Portland switch forwarding logic.
+  // Simulator::Schedule (m_lookupDelay, &OpenFlowSwitchNetDevice::PortlandFlowTableLookup, this, key, buffer, packet_uid, port, send_to_controller);
 }
 
 int
