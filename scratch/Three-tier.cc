@@ -400,7 +400,7 @@ int main(int argc, char *argv[]) {
         base = toString(0, 0, 0, fourth_octet);
         address.SetBase(subnet, "255.255.255.0", base);
         ipCaContainer[i][j][h] = address.Assign(ca[i][j][h]);
-        fourth_octet += 4;
+        fourth_octet += 2;
       }
     }
   }
