@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
     podRand = rand() % num_pod + 0;
     swRand = rand() % num_edge + 0;
     hostRand = rand() % num_host + 0;
-    hostRand = hostRand + 2;
+    // hostRand = hostRand + 2; // why add 2? due to bridge
     char *add;
     add = toString(10, podRand, swRand, hostRand);
 
@@ -201,7 +201,7 @@ int main(int argc, char *argv[]) {
     rand2 = rand() % num_edge + 0;
     rand3 = rand() % num_host + 0;
 
-    while (rand1 == podRand && swRand == rand2 && (rand3 + 2) == hostRand) {
+    while (rand1 == podRand && swRand == rand2 && rand3 == hostRand) { // +2
       rand1 = rand() % num_pod + 0;
       rand2 = rand() % num_edge + 0;
       rand3 = rand() % num_host + 0;
@@ -286,14 +286,15 @@ int main(int argc, char *argv[]) {
   //=========== Connect aggregate switches to edge switches ===========//
   //
   NetDeviceContainer ae[num_pod][num_agg][num_edge];
-  NetDeviceContainer aggSw[num_pod][num_agg][num_edge];
+  NetDeviceContainer aggSw[num_pod][num_agg];
   // Ipv4InterfaceContainer ipAeContainer[num_pod][num_agg][num_edge];
   for (i = 0; i < num_pod; i++) {
     for (j = 0; j < num_agg; j++) {
       for (h = 0; h < num_edge; h++) {
         ae[i][j][h] =
             csma.Install(NodeContainer(agg[i].Get(j), edge[i].Get(h)));
-        aggSw[i][j][h].Add(ae[i][j][h].Get(0));
+
+        aggSw[i][j].Add(ae[i][j][h].Get(0));
 
         // int second_octet = i;
         // int third_octet = j+(k/2);
@@ -308,14 +309,16 @@ int main(int argc, char *argv[]) {
         // base = toString(0, 0, 0, fourth_octet);
         // address.SetBase (subnet, "255.255.255.0",base);
         // ipAeContainer[i][j][h] = address.Assign(ae[i][j][h]);
-
-        // add switch
-        Ptr<Node> switchNode = agg[i].Get(j);
-        OpenFlowSwitchHelper swtch;
-
-        Ptr<ns3::ofi::LearningController> controller =
-            CreateObject<ns3::ofi::LearningController>();
-        swtch.Install(switchNode, aggSw[i][j][h], controller);
+      }
+      // add switch
+      Ptr<Node> switchNode = agg[i].Get(j);
+      Ptr<ns3::ofi::LearningController> controller =
+          CreateObject<ns3::ofi::LearningController>();
+      Ptr<OpenFlowSwitchNetDevice> swtch = new OpenFlowSwitchNetDevice();
+      swtch->SetController(controller);
+      switchNode->AddDevice(swtch);
+      for (h = 0; h < num_edge; h++) {
+        swtch->AddSwitchPort(aggSw[i][j].Get(h));
       }
     }
   }
