@@ -976,7 +976,7 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
   } else if(m_level == 1) {    // Agg switch.
     if(m_pod == dst_pod) {
       // In the same pod. Just send it to the right edge switch.
-      // TODO: How agg switch's port is orgnized?  
+      output_port = dst_pos;
 
     } else {
       // Not in a same pod. Shoud send to core switch.
