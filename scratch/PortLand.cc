@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
     podRand = rand() % num_pod + 0;
     swRand = rand() % num_edge + 0;
     hostRand = rand() % num_host + 0;
-    // hostRand = hostRand + 2; // why add 2? due to bridge
+    hostRand = hostRand + 2; // why add 2? due to bridge
     char *add;
     add = toString(10, podRand, swRand, hostRand);
 
@@ -208,7 +208,8 @@ int main(int argc, char *argv[]) {
     rand2 = rand() % num_edge + 0;
     rand3 = rand() % num_host + 0;
 
-    while (rand1 == podRand && swRand == rand2 && rand3 == hostRand) { // +2
+    // +2
+    while (rand1 == podRand && swRand == rand2 && (rand3 + 2) == hostRand) {
       rand1 = rand() % num_pod + 0;
       rand2 = rand() % num_edge + 0;
       rand3 = rand() % num_host + 0;
