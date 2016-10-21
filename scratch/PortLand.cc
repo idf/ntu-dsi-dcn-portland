@@ -235,6 +235,7 @@ int main(int argc, char *argv[]) {
   //
   NetDeviceContainer hostSw[num_pod][num_edge];
   // NetDeviceContainer bridgeDevices[num_pod][num_bridge];
+  Ptr<OpenFlowSwitchNetDevice> edgeSwtchs[num_pod][num_edge];
   NetDeviceContainer hostDevices[num_pod][num_edge];
   Ipv4InterfaceContainer ipContainer[num_pod][num_edge];
 
@@ -263,12 +264,20 @@ int main(int argc, char *argv[]) {
       }
       // add switch
       Ptr<Node> switchNode = edge[i].Get(j);
-      OpenFlowSwitchHelper swtch;
-
-      // TODO pass position of the switch.
       Ptr<ns3::ofi::LearningController> controller =
           CreateObject<ns3::ofi::LearningController>();
-      swtch.Install(switchNode, hostSw[i][j], controller);
+      edgeSwtchs[i][j] = new OpenFlowSwitchNetDevice();
+      edgeSwtchs[i][j]->SetController(controller);
+      switchNode->AddDevice(edgeSwtchs[i][j]);
+
+      edgeSwtchs[i][j]->m_pod = i;
+      edgeSwtchs[i][j]->m_pos = j;
+      edgeSwtchs[i][j]->m_level = 0;
+
+      for (h = 0; h < num_host; h++) {
+        edgeSwtchs[i][j]->m_port_dir.insert(make_pair(h, false));
+        edgeSwtchs[i][j]->AddSwitchPort(hostSw[i][j].Get(h));
+      }
 
       // BridgeHelper bHelper;
       // bHelper.Install (bridge[i].Get(j), bridgeDevices[i][j]);
@@ -286,16 +295,15 @@ int main(int argc, char *argv[]) {
   //=========== Connect aggregate switches to edge switches ===========//
   //
   NetDeviceContainer ae[num_pod][num_agg][num_edge];
-  NetDeviceContainer aggSw[num_pod][num_agg];
+  Ptr<OpenFlowSwitchNetDevice> aggSwtchs[num_pod][num_agg];
+  // NetDeviceContainer aggSw[num_pod][num_agg];
+  // NetDeviceContainer edgeSw[num_pod][num_edge];
   // Ipv4InterfaceContainer ipAeContainer[num_pod][num_agg][num_edge];
   for (i = 0; i < num_pod; i++) {
     for (j = 0; j < num_agg; j++) {
       for (h = 0; h < num_edge; h++) {
         ae[i][j][h] =
             csma.Install(NodeContainer(agg[i].Get(j), edge[i].Get(h)));
-
-        aggSw[i][j].Add(ae[i][j][h].Get(0));
-
         // int second_octet = i;
         // int third_octet = j+(k/2);
         // int fourth_octet;
@@ -310,15 +318,27 @@ int main(int argc, char *argv[]) {
         // address.SetBase (subnet, "255.255.255.0",base);
         // ipAeContainer[i][j][h] = address.Assign(ae[i][j][h]);
       }
-      // add switch
+      // add agg switch
       Ptr<Node> switchNode = agg[i].Get(j);
       Ptr<ns3::ofi::LearningController> controller =
           CreateObject<ns3::ofi::LearningController>();
-      Ptr<OpenFlowSwitchNetDevice> swtch = new OpenFlowSwitchNetDevice();
-      swtch->SetController(controller);
-      switchNode->AddDevice(swtch);
+      aggSwtchs[i][j] = new OpenFlowSwitchNetDevice();
+      aggSwtchs[i][j]->SetController(controller);
+      switchNode->AddDevice(aggSwtchs[i][j]);
+
+      aggSwtchs[i][j]->m_pod = i;
+      aggSwtchs[i][j]->m_pos = -1;
+      aggSwtchs[i][j]->m_level = 1;
+
       for (h = 0; h < num_edge; h++) {
-        swtch->AddSwitchPort(aggSw[i][j].Get(h));
+        aggSwtchs[i][j]->m_port_dir.insert(make_pair(h, false));
+        aggSwtchs[i][j]->AddSwitchPort(ae[i][j][h].Get(0));
+      }
+    }
+    for (h = 0; h < num_edge; h++) {
+      for (j = 0; j < num_agg; j++) {
+        edgeSwtchs[i][h]->m_port_dir.insert(make_pair(j + (k / 2), true));
+        edgeSwtchs[i][h]->AddSwitchPort(ae[i][j][h].Get(1));
       }
     }
   }
@@ -328,17 +348,17 @@ int main(int argc, char *argv[]) {
   //=========== Connect core switches to aggregate switches ===========//
   //
   NetDeviceContainer ca[num_group][num_core][num_pod];
-  NetDeviceContainer coreSw[num_group][num_core][num_pod];
+  // NetDeviceContainer coreSw[num_group][num_core][num_pod];
   // Ipv4InterfaceContainer ipCaContainer[num_group][num_core][num_pod];
   // int fourth_octet =1;
-
+  Ptr<OpenFlowSwitchNetDevice> coreSwtchs[num_group][num_core];
   for (i = 0; i < num_group; i++) {
     for (j = 0; j < num_core; j++) {
       // fourth_octet = 1;
       for (h = 0; h < num_pod; h++) {
         ca[i][j][h] =
             csma.Install(NodeContainer(core[i].Get(j), agg[h].Get(i)));
-        coreSw[i][j][h].Add(ca[i][j][h].Get(0));
+        // coreSw[i][j][h].Add(ca[i][j][h].Get(0));
         // int second_octet = k+i;
         // int third_octet = j;
         // //Assign subnet
@@ -350,14 +370,29 @@ int main(int argc, char *argv[]) {
         // address.SetBase (subnet, "255.255.255.0",base);
         // ipCaContainer[i][j][h] = address.Assign(ca[i][j][h]);
         // fourth_octet +=2;
+      }
 
-        // add switch
-        Ptr<Node> switchNode = core[i].Get(j);
-        OpenFlowSwitchHelper swtch;
+      // add switch
+      Ptr<Node> switchNode = core[i].Get(j);
+      Ptr<ns3::ofi::LearningController> controller =
+          CreateObject<ns3::ofi::LearningController>();
+      coreSwtchs[i][j] = new OpenFlowSwitchNetDevice();
+      coreSwtchs[i][j]->SetController(controller);
+      switchNode->AddDevice(coreSwtchs[i][j]);
 
-        Ptr<ns3::ofi::LearningController> controller =
-            CreateObject<ns3::ofi::LearningController>();
-        swtch.Install(switchNode, coreSw[i][j][h], controller);
+      coreSwtchs[i][j]->m_pod = -1;
+      coreSwtchs[i][j]->m_pos = -1;
+      coreSwtchs[i][j]->m_level = 2;
+
+      for (h = 0; h < num_pod; h++) {
+        coreSwtchs[i][j]->m_port_dir.insert(make_pair(h, false));
+        coreSwtchs[i][j]->AddSwitchPort(ca[i][j][h].Get(0));
+      }
+    }
+    for (h = 0; h < num_pod; h++) {
+      for (j = 0; j < num_core; j++) {
+        aggSwtchs[h][i]->m_port_dir.insert(make_pair(j + (k / 2), true));
+        aggSwtchs[h][i]->AddSwitchPort(ca[i][j][h].Get(1));
       }
     }
   }
