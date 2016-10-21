@@ -119,13 +119,13 @@ int
 //=========== Define parameters based on value of k ===========//
 //
 	int k = 4;			// number of ports per switch
-	int num_pod = (k/2);		// number of pod
-	int num_host = (k);		// number of hosts under a switch
+	int num_pod = k;		// number of pod
+	int num_host = k/2;		// number of hosts under a switch
 	int num_edge = (k/2);		// number of edge switch in a pod
 	int num_bridge = num_edge;	// number of bridge in a pod
-	int num_agg = (k/2);		// number of aggregation switch in a pod
+	int num_agg = (k/4);		// number of aggregation switch in a pod
 	int num_group = 1;		// number of group of core switches
-        int num_core = (k/2);		// number of core switch in a group
+    int num_core = (k/2);		// number of core switch in a group
 	int total_host = k*k*k/4;	// number of hosts in the entire network	
 	char filename [] = "statistics/Three-tier2.xml";// filename for Flow Monitor xml output file
 
