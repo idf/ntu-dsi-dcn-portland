@@ -89,6 +89,14 @@ namespace ns3 {
 class OpenFlowSwitchNetDevice : public NetDevice
 {
 public:
+
+  // Portland related vars.
+  int m_switch_id;  // Unique switch id.
+  int m_pod;  // Pod number.
+  int m_pos;  // Position of edge switch in each pod.
+  int m_level; // Level of the switch: 0, 1 or 2.
+  std::map<int, bool> m_port_dir; // Port direction. True -> Up, False->Down
+
   static TypeId GetTypeId (void);
 
   /**
@@ -549,13 +557,6 @@ private:
 
   sw_chain *m_chain;             ///< Flow Table; forwarding rules.
   vport_table_t m_vportTable;    ///< Virtual Port Table
-
-  // Portland related vars.
-  int m_switch_id;  // Unique switch id.
-  int m_pod;  // Pod number.
-  int m_pos;  // Position of edge switch in each pod.
-  int m_level; // Level of the switch: 0, 1 or 2.
-  std::map<int, bool> m_port_dir; // Port direction. True -> Up, False->Down
 };
 
 } // namespace ns3
