@@ -75,6 +75,13 @@ IpMacMap ipMacMap;
 // Main function
 //
 int main(int argc, char *argv[]) {
+  /*
+  export NS_LOG=PortLand-Architecture=level_all
+  export NS_LOG=OpenFlowSwitchNetDevice=level_all
+  */
+  LogComponentEnable("PortLand-Architecture", LOG_LEVEL_INFO);
+  LogComponentEnable("OpenFlowSwitchNetDevice", LOG_LEVEL_INFO);
+
   //=========== Define parameters based on value of k ===========//
   //
   int k = 4;                      // number of ports per switch
@@ -273,6 +280,7 @@ int main(int argc, char *argv[]) {
       edgeSwtchs[i][j]->m_pod = i;
       edgeSwtchs[i][j]->m_pos = j;
       edgeSwtchs[i][j]->m_level = 0;
+      edgeSwtchs[i][j]->IP_MAC_MAP = ipMacMap;
 
       for (h = 0; h < num_host; h++) {
         edgeSwtchs[i][j]->m_port_dir.insert(make_pair(h, false));
@@ -329,6 +337,7 @@ int main(int argc, char *argv[]) {
       aggSwtchs[i][j]->m_pod = i;
       aggSwtchs[i][j]->m_pos = -1;
       aggSwtchs[i][j]->m_level = 1;
+      aggSwtchs[i][j]->IP_MAC_MAP = ipMacMap;
 
       for (h = 0; h < num_edge; h++) {
         aggSwtchs[i][j]->m_port_dir.insert(make_pair(h, false));
@@ -383,6 +392,7 @@ int main(int argc, char *argv[]) {
       coreSwtchs[i][j]->m_pod = -1;
       coreSwtchs[i][j]->m_pos = -1;
       coreSwtchs[i][j]->m_level = 2;
+      coreSwtchs[i][j]->IP_MAC_MAP = ipMacMap;
 
       for (h = 0; h < num_pod; h++) {
         coreSwtchs[i][j]->m_port_dir.insert(make_pair(h, false));
