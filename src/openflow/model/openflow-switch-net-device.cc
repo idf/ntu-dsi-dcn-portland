@@ -949,18 +949,28 @@ OpenFlowSwitchNetDevice::SendErrorMsg (uint16_t type, uint16_t code, const void 
 }
 
 void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* buffer, uint32_t packet_uid, int port, bool send_to_controller) {
+  std::cout<<"FUCK!!!!!!!"<<key.flow.nw_dst<<std::endl;
   // For portland switch, we don't lookup flow table, 
   // instead, we forwarding the packet according to its PMAC and current switch's location.
   NS_LOG_INFO("Portland switch: forwarding packet using PMAC and my location.");
 
   // Get the destination PMAC of this package.
-  sw_flow_key my_key;
-  my_key.wildcards = 0;
-  flow_extract (buffer, -1, &my_key.flow);   // The second par isn't important: we don't care about in-port.
-  Mac48Address dst_addr;
-  dst_addr.CopyFrom (my_key.flow.dl_dst);
+  // sw_flow_key my_key;
+  // my_key.wildcards = 0;
+  // flow_extract (buffer, -1, &my_key.flow);   // The second par isn't important: we don't care about in-port.
+
+  Mac48Address dl_dst_addr;
+  Ipv4Address nw_dst_addr(key.flow.nw_dst);
   uint8_t pmac[6];
-  dst_addr.CopyTo(pmac);
+  if(IP_MAC_MAP.count(nw_dst_addr)) {
+    NS_LOG_INFO("Portland switch: can find the map from IP to PMAC.");
+    dl_dst_addr = IP_MAC_MAP[nw_dst_addr];
+  } else {
+    NS_LOG_INFO("Portland switch: can't find the map from IP to PMAC.");
+    //std::cout<<"FUCK!!!!!!!"<<key.flow.nw_dst<<std::endl;
+    dl_dst_addr.CopyFrom (key.flow.dl_dst);
+  }
+  dl_dst_addr.CopyTo(pmac);
 
   // Extract dst position info from PMAC.
   int dst_pod = (((int)pmac[0]) << 6 ) + (int)pmac[1];
@@ -1088,10 +1098,10 @@ OpenFlowSwitchNetDevice::RunThroughFlowTable (uint32_t packet_uid, int port, boo
     }
 
   NS_LOG_INFO ("Matching against the flow table.");
-  Simulator::Schedule (m_lookupDelay, &OpenFlowSwitchNetDevice::FlowTableLookup, this, key, buffer, packet_uid, port, send_to_controller);
+  //Simulator::Schedule (m_lookupDelay, &OpenFlowSwitchNetDevice::FlowTableLookup, this, key, buffer, packet_uid, port, send_to_controller);
 
   // Use code below to run the Portland switch forwarding logic.
-  // Simulator::Schedule (m_lookupDelay, &OpenFlowSwitchNetDevice::PortlandFlowTableLookup, this, key, buffer, packet_uid, port, send_to_controller);
+  Simulator::Schedule (m_lookupDelay, &OpenFlowSwitchNetDevice::PortlandFlowTableLookup, this, key, buffer, packet_uid, port, send_to_controller);
 }
 
 int
