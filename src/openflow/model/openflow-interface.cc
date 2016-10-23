@@ -353,7 +353,7 @@ Stats::PortStatsDump (Ptr<OpenFlowSwitchNetDevice> swtch, PortStatsState *s, ofp
           ops->collisions   = htonll (-1);
           ops->mpls_ttl0_dropped = htonll (p.mpls_ttl0_dropped);
           ops++;
-        } 
+        }
       else if (port >= OFPP_VP_START && port <= OFPP_VP_END) // virtual port?
         {
           // lookup the virtual port
@@ -725,12 +725,12 @@ Controller::StartDump (StatsDumpCallback* cb)
         {
           error = cb->swtch->StatsDump (cb);
         }
-	
+
       if (error != 0) // When the reply is complete, error will equal zero if there's no errors.
         {
           NS_LOG_WARN ("Dump Callback Error: " << strerror (-error));
         }
-	
+
       // Clean up
       cb->swtch->StatsDone (cb);
     }
@@ -791,7 +791,7 @@ void FabricController::ReceiveFromSwitch(Ptr<OpenFlowSwitchNetDevice> swtch, ofp
     return;
   }
   // TODO: Hardcode the IP->PMAC mapping here.
-  
+
   return;
 }
 
@@ -891,7 +891,7 @@ ExecuteActions (Ptr<OpenFlowSwitchNetDevice> swtch, uint64_t packet_uid, ofpbuf*
   uint8_t *p = (uint8_t *)actions;
 
   prev_port = -1;
-
+  std::cout << "YY ExecuteActions " << actions_len << std::endl;
   if (actions_len == 0)
     {
       NS_LOG_INFO ("No actions set to this flow. Dropping packet.");
@@ -903,7 +903,7 @@ ExecuteActions (Ptr<OpenFlowSwitchNetDevice> swtch, uint64_t packet_uid, ofpbuf*
   while (actions_len > 0)
     {
       ofp_action_header *ah = (ofp_action_header *)p;
-      size_t len = htons (ah->len);
+      size_t len = (ah->len);//htons (ah->len);
 
       if (prev_port != -1)
         {
@@ -913,34 +913,45 @@ ExecuteActions (Ptr<OpenFlowSwitchNetDevice> swtch, uint64_t packet_uid, ofpbuf*
 
       if (ah->type == htons (OFPAT_OUTPUT))
         {
+            std::cout << "YY 916 " << len << std::endl;
+
           ofp_action_output *oa = (ofp_action_output *)p;
 
           // port is now 32-bits
           prev_port = oa->port; // ntohl(oa->port);
-          // prev_port = ntohs(oa->port);
+         //  prev_port = ntohs(oa->port);
           max_len = ntohs (oa->max_len);
         }
       else
         {
+std::cout << "YY 927 " << prev_port << std::endl;
+
           uint16_t type = ntohs (ah->type);
           if (Action::IsValidType ((ofp_action_type)type)) // Execute a built-in OpenFlow action against 'buffer'.
             {
+std::cout << "YY 932 " << prev_port << std::endl;
+
               Action::Execute ((ofp_action_type)type, buffer, key, ah);
             }
           else if (type == OFPAT_VENDOR)
             {
+
               ExecuteVendor (buffer, key, ah);
             }
         }
+  std::cout << "YY 944 " << prev_port << std::endl;
 
       p += len;
       actions_len -= len;
+std::cout << "Actions_len " << actions_len << std::endl;
     }
 
   if (prev_port != -1)
     {
       swtch->DoOutput (packet_uid, in_port, max_len, prev_port, ignore_no_fwd);
     }
+  std::cout << "YY ExecuteActions Done" << std::endl;
+
 }
 
 uint16_t
@@ -1014,6 +1025,9 @@ ExecuteVPortActions (Ptr<OpenFlowSwitchNetDevice> swtch, uint64_t packet_uid, of
   prev_port = -1;
   /* The action list was already validated, so we can be a bit looser
    * in our sanity-checking. */
+
+  std::cout << "YY ExecuteVPortActions " << std::endl;
+
   while (actions_len > 0)
     {
       ofp_action_header *ah = (ofp_action_header *)p;
@@ -1044,6 +1058,8 @@ ExecuteVPortActions (Ptr<OpenFlowSwitchNetDevice> swtch, uint64_t packet_uid, of
     {
       swtch->DoOutput (packet_uid, in_port, max_len, prev_port, false);
     }
+  std::cout << "YY ExecuteVPortActions Done" << std::endl;
+
 }
 
 uint16_t

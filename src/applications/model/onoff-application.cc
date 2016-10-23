@@ -71,7 +71,7 @@ OnOffApplication::GetTypeId (void)
                    RandomVariableValue (ConstantVariable (1.0)),
                    MakeRandomVariableAccessor (&OnOffApplication::m_offTime),
                    MakeRandomVariableChecker ())
-    .AddAttribute ("MaxBytes", 
+    .AddAttribute ("MaxBytes",
                    "The total number of bytes to send. Once these bytes are sent, "
                    "no packet is sent again, even in on state. The value zero means "
                    "that there is no limit.",
@@ -104,7 +104,7 @@ OnOffApplication::~OnOffApplication()
   NS_LOG_FUNCTION_NOARGS ();
 }
 
-void 
+void
 OnOffApplication::SetMaxBytes (uint32_t maxBytes)
 {
   NS_LOG_FUNCTION (this << maxBytes);
@@ -132,7 +132,7 @@ OnOffApplication::DoDispose (void)
 void OnOffApplication::StartApplication () // Called at time specified by Start
 {
   NS_LOG_FUNCTION_NOARGS ();
-
+  std::cout<< "YY StartApplication" << std::endl;
   // Create the socket if not already
   if (!m_socket)
     {
@@ -239,6 +239,7 @@ void OnOffApplication::ScheduleStopEvent ()
 
 void OnOffApplication::SendPacket ()
 {
+  std::cout << "YY SendPacket" << std::endl;
   NS_LOG_FUNCTION_NOARGS ();
   NS_LOG_LOGIC ("sending packet at " << Simulator::Now ());
   NS_ASSERT (m_sendEvent.IsExpired ());

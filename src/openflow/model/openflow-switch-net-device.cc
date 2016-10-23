@@ -303,6 +303,7 @@ OpenFlowSwitchNetDevice::IsBridge (void) const
 void
 OpenFlowSwitchNetDevice::DoOutput (uint32_t packet_uid, int in_port, size_t max_len, int out_port, bool ignore_no_fwd)
 {
+  NS_LOG_DEBUG( "YY DoOutput " );
   if (out_port != OFPP_CONTROLLER)
     {
       OutputPort (packet_uid, in_port, out_port, ignore_no_fwd);
@@ -311,6 +312,8 @@ OpenFlowSwitchNetDevice::DoOutput (uint32_t packet_uid, int in_port, size_t max_
     {
       OutputControl (packet_uid, in_port, max_len, OFPR_ACTION);
     }
+  NS_LOG_DEBUG( "YY DoOutput Done" );
+
 }
 
 bool
@@ -602,7 +605,7 @@ OpenFlowSwitchNetDevice::ReceiveFromDevice (Ptr<NetDevice> netdev, Ptr<const Pac
 
   Mac48Address dst48 = Mac48Address::ConvertFrom (dst);
   NS_LOG_INFO ("Received packet from " << Mac48Address::ConvertFrom (src) << " looking for " << dst48);
-
+  NS_LOG_INFO ("The packetType is " << packetType );
   for (size_t i = 0; i < m_ports.size (); i++)
     {
       if (m_ports[i].netdev == netdev)
@@ -673,7 +676,7 @@ OpenFlowSwitchNetDevice::ReceiveFromDevice (Ptr<NetDevice> netdev, Ptr<const Pac
         for (int i = 0; i < 6; i++)
           str << (i!=0 ? ":" : "") << std::hex << f->key.flow.dl_dst[i]/16 << f->key.flow.dl_dst[i]%16;
         str <<  "] expired.";
-	
+
         NS_LOG_INFO (str.str ());
         SendFlowExpired (f, (ofp_flow_expired_reason)f->reason);
         list_remove (&f->node);
@@ -689,6 +692,7 @@ OpenFlowSwitchNetDevice::OutputAll (uint32_t packet_uid, int in_port, bool flood
 {
   NS_LOG_FUNCTION_NOARGS ();
   NS_LOG_INFO ("Flooding over ports.");
+  NS_LOG_DEBUG( "YY OutputAll " );
 
   int prev_port = -1;
   for (size_t i = 0; i < m_ports.size (); i++)
@@ -743,10 +747,10 @@ OpenFlowSwitchNetDevice::OutputPacket (uint32_t packet_uid, int out_port)
 }
 
 void
-OpenFlowSwitchNetDevice::OutputPort (uint32_t packet_uid, int in_port, int out_port, bool ignore_no_fwd)
+OpenFlowSwitchNetDevice:: OutputPort(uint32_t packet_uid, int in_port, int out_port, bool ignore_no_fwd)
 {
   NS_LOG_FUNCTION_NOARGS ();
-
+  NS_LOG_DEBUG( "YY OutputPort " << packet_uid << " " << in_port << " " << out_port );
   if (out_port == OFPP_FLOOD)
     {
       OutputAll (packet_uid, in_port, true);
@@ -950,7 +954,7 @@ OpenFlowSwitchNetDevice::SendErrorMsg (uint16_t type, uint16_t code, const void 
 
 void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* buffer, uint32_t packet_uid, int port, bool send_to_controller) {
   std::cout<<"FUCK!!!!!!!"<<key.flow.nw_dst<<std::endl;
-  // For portland switch, we don't lookup flow table, 
+  // For portland switch, we don't lookup flow table,
   // instead, we forwarding the packet according to its PMAC and current switch's location.
   NS_LOG_INFO("Portland switch: forwarding packet using PMAC and my location.");
 
@@ -1024,13 +1028,15 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
   actions[0].type = htons (OFPAT_OUTPUT);
   actions[0].len = 16;
   actions[0].port = output_port;
-
+  NS_LOG_INFO("YY Try to call ExecuteActions");
   // Forwarding package.
   ofi::ExecuteActions(this, packet_uid, buffer, &key, (ofp_action_header *)actions, 16, false);
+  NS_LOG_INFO("YY PortlandFlowTableLookup Done");
+
 }
 
 void
-OpenFlowSwitchNetDevice::FlowTableLookup (sw_flow_key key, ofpbuf* buffer, uint32_t packet_uid, int port, bool send_to_controller)
+OpenFlowSwitchNetDevice:: FlowTableLookup(sw_flow_key key, ofpbuf* buffer, uint32_t packet_uid, int port, bool send_to_controller)
 {
   sw_flow *flow = chain_lookup (m_chain, &key);
   if (flow != 0)
@@ -1107,6 +1113,7 @@ OpenFlowSwitchNetDevice::RunThroughFlowTable (uint32_t packet_uid, int port, boo
 int
 OpenFlowSwitchNetDevice::RunThroughVPortTable (uint32_t packet_uid, int port, uint32_t vport)
 {
+  NS_LOG_DEBUG( "YY RunThroughVPortTable " );
   ofpbuf* buffer = m_packetData.find (packet_uid)->second.buffer;
 
   // extract the flow again since we need it
@@ -1217,7 +1224,8 @@ OpenFlowSwitchNetDevice::ReceivePacketOut (const void *msg)
     }
   else
     {
-      buffer = retrieve_buffer (ntohl (opo->buffer_id));
+      // FIXME: Which one is correct?
+      buffer = retrieve_buffer(opo->buffer_id);// (ntohl (opo->buffer_id));
       if (buffer == 0)
         {
           return -ESRCH;
@@ -1234,7 +1242,7 @@ OpenFlowSwitchNetDevice::ReceivePacketOut (const void *msg)
       ofpbuf_delete (buffer);
       return -EINVAL;
     }
-
+  NS_LOG_DEBUG( "YY ReceivePacketOut" );
   ofi::ExecuteActions (this, opo->buffer_id, buffer, &key, opo->actions, actions_len, true);
   return 0;
 }

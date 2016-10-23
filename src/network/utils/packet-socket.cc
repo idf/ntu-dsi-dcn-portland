@@ -63,7 +63,7 @@ PacketSocket::PacketSocket () : m_rxAvailable (0)
   m_device = 0;
 }
 
-void 
+void
 PacketSocket::SetNode (Ptr<Node> node)
 {
   NS_LOG_FUNCTION (this << node);
@@ -75,7 +75,7 @@ PacketSocket::~PacketSocket ()
   NS_LOG_FUNCTION (this);
 }
 
-void 
+void
 PacketSocket::DoDispose (void)
 {
   NS_LOG_FUNCTION (this);
@@ -114,7 +114,7 @@ PacketSocket::Bind (void)
 
 int
 PacketSocket::Bind (const Address &address)
-{ 
+{
   NS_LOG_FUNCTION (this << address);
   if (!PacketSocketAddress::IsMatchingType (address))
     {
@@ -237,7 +237,7 @@ error:
   NotifyConnectionFailed ();
   return -1;
 }
-int 
+int
 PacketSocket::Listen (void)
 {
   m_errno = Socket::ERROR_OPNOTSUPP;
@@ -247,6 +247,7 @@ PacketSocket::Listen (void)
 int
 PacketSocket::Send (Ptr<Packet> p, uint32_t flags)
 {
+  std::cout <<"YY Send 2 parameters\n";
   NS_LOG_FUNCTION (this << p << flags);
   if (m_state == STATE_OPEN ||
       m_state == STATE_BOUND)
@@ -277,7 +278,7 @@ PacketSocket::GetMinMtu (PacketSocketAddress ad) const
     }
 }
 
-uint32_t 
+uint32_t
 PacketSocket::GetTxAvailable (void) const
 {
   if (m_state == STATE_CONNECTED)
@@ -360,8 +361,8 @@ PacketSocket::SendTo (Ptr<Packet> p, uint32_t flags, const Address &address)
     }
 }
 
-void 
-PacketSocket::ForwardUp (Ptr<NetDevice> device, Ptr<const Packet> packet, 
+void
+PacketSocket::ForwardUp (Ptr<NetDevice> device, Ptr<const Packet> packet,
                          uint16_t protocol, const Address &from,
                          const Address &to, NetDevice::PacketType packetType)
 {
@@ -404,12 +405,12 @@ uint32_t
 PacketSocket::GetRxAvailable (void) const
 {
   NS_LOG_FUNCTION (this);
-  // We separately maintain this state to avoid walking the queue 
+  // We separately maintain this state to avoid walking the queue
   // every time this might be called
   return m_rxAvailable;
 }
 
-Ptr<Packet> 
+Ptr<Packet>
 PacketSocket::Recv (uint32_t maxSize, uint32_t flags)
 {
   NS_LOG_FUNCTION (this << maxSize << flags);

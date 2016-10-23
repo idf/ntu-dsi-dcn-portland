@@ -94,14 +94,14 @@ UdpSocketImpl::~UdpSocketImpl ()
   m_udp = 0;
 }
 
-void 
+void
 UdpSocketImpl::SetNode (Ptr<Node> node)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_node = node;
 
 }
-void 
+void
 UdpSocketImpl::SetUdp (Ptr<UdpL4Protocol> udp)
 {
   NS_LOG_FUNCTION_NOARGS ();
@@ -129,7 +129,7 @@ UdpSocketImpl::GetNode (void) const
   return m_node;
 }
 
-void 
+void
 UdpSocketImpl::Destroy (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
@@ -160,7 +160,7 @@ UdpSocketImpl::Bind (void)
   return FinishBind ();
 }
 
-int 
+int
 UdpSocketImpl::Bind (const Address &address)
 {
   NS_LOG_FUNCTION (this << address);
@@ -194,7 +194,7 @@ UdpSocketImpl::Bind (const Address &address)
   return FinishBind ();
 }
 
-int 
+int
 UdpSocketImpl::ShutdownSend (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
@@ -202,7 +202,7 @@ UdpSocketImpl::ShutdownSend (void)
   return 0;
 }
 
-int 
+int
 UdpSocketImpl::ShutdownRecv (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
@@ -237,16 +237,17 @@ UdpSocketImpl::Connect (const Address & address)
   return 0;
 }
 
-int 
+int
 UdpSocketImpl::Listen (void)
 {
   m_errno = Socket::ERROR_OPNOTSUPP;
   return -1;
 }
 
-int 
+int
 UdpSocketImpl::Send (Ptr<Packet> p, uint32_t flags)
 {
+  std::cout << "YY Send UDPSocketImpl\n";
   NS_LOG_FUNCTION (this << p << flags);
 
   if (!m_connected)
@@ -257,7 +258,7 @@ UdpSocketImpl::Send (Ptr<Packet> p, uint32_t flags)
   return DoSend (p);
 }
 
-int 
+int
 UdpSocketImpl::DoSend (Ptr<Packet> p)
 {
   NS_LOG_FUNCTION (this << p);
@@ -274,7 +275,7 @@ UdpSocketImpl::DoSend (Ptr<Packet> p)
     {
       m_errno = ERROR_SHUTDOWN;
       return -1;
-    } 
+    }
 
   return DoSendTo (p, m_defaultAddress, m_defaultPort);
 }
@@ -303,6 +304,9 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, const Address &address)
 int
 UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
 {
+  //p->EnablePrinting();
+//p->Print(std::cout);
+// std::cout << "YY Packet: " << (p->ToString()) << std::endl;
   NS_LOG_FUNCTION (this << p << dest << port);
   if (m_boundnetdevice)
     {
@@ -330,7 +334,9 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
     }
 
   Ptr<Ipv4> ipv4 = m_node->GetObject<Ipv4> ();
-
+  //Ptr<NetDevice> ndv = m_node->GetDevice();
+  std::cout << "YY DoSend UDP " << dest << " " << dest.IsBroadcast(  )<< " " << port << m_node->GetId() <<std::endl;
+      //ndv->GetAddress()  << "\n " //<< *ipv4 << std::endl;
   // Locally override the IP TTL for this socket
   // We cannot directly modify the TTL at this stage, so we set a Packet tag
   // The destination can be either multicast, unicast/anycast, or
@@ -369,7 +375,7 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
   }
   //
   // If dest is set to the limited broadcast address (all ones),
-  // convert it to send a copy of the packet out of every 
+  // convert it to send a copy of the packet out of every
   // interface as a subnet-directed broadcast.
   // Exception:  if the interface has a /32 address, there is no
   // valid subnet-directed broadcast, so send it as limited broadcast
@@ -392,7 +398,7 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
           if (addri == Ipv4Address ("127.0.0.1"))
             continue;
           // Check if interface-bound socket
-          if (m_boundnetdevice) 
+          if (m_boundnetdevice)
             {
               if (ipv4->GetNetDevice (i) != m_boundnetdevice)
                 continue;
@@ -405,6 +411,7 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
                                                      << " (mask is " << maski << ")");
               m_udp->Send (p->Copy (), addri, dest,
                            m_endPoint->GetLocalPort (), port);
+              std::cout << "YY 411 UDP Send Successfully\n";
               NotifyDataSent (p->GetSize ());
               NotifySend (GetTxAvailable ());
             }
@@ -416,6 +423,8 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
                                                      << " (mask is " << maski << ")");
               m_udp->Send (p->Copy (), addri, bcast,
                            m_endPoint->GetLocalPort (), port);
+              std::cout << "YY 423 UDP Send Successfully\n";
+
               NotifyDataSent (p->GetSize ());
               NotifySend (GetTxAvailable ());
             }
@@ -427,6 +436,8 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
     {
       m_udp->Send (p->Copy (), m_endPoint->GetLocalAddress (), dest,
                    m_endPoint->GetLocalPort (), port, 0);
+      std::cout << "YY 436 UDP Send Successfully\n";
+
       NotifyDataSent (p->GetSize ());
       NotifySend (GetTxAvailable ());
       return p->GetSize ();
@@ -440,14 +451,21 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
       Ptr<Ipv4Route> route;
       Ptr<NetDevice> oif = m_boundnetdevice; //specify non-zero if bound to a specific device
       // TBD-- we could cache the route and just check its validity
-      route = ipv4->GetRoutingProtocol ()->RouteOutput (p, header, oif, errno_); 
-      if (route != 0)
+      route = ipv4->GetRoutingProtocol ()->RouteOutput (p, header, oif, errno_);
+      if (1)//(route != 0)
         {
           NS_LOG_LOGIC ("Route exists");
+          std::cout << "YY 455\n";
           if (!m_allowBroadcast)
             {
+          std::cout << "YY 458\n";
+
               uint32_t outputIfIndex = ipv4->GetInterfaceForDevice (route->GetOutputDevice ());
+              std::cout << "YY 461\n";
+
               uint32_t ifNAddr = ipv4->GetNAddresses (outputIfIndex);
+              std::cout << "YY 464\n";
+
               for (uint32_t addrI = 0; addrI < ifNAddr; ++addrI)
                 {
                   Ipv4InterfaceAddress ifAddr = ipv4->GetAddress (outputIfIndex, addrI);
@@ -457,16 +475,20 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
                       return -1;
                     }
                 }
-            }
+              std::cout << "YY 475\n";
 
-          header.SetSource (route->GetSource ());
+            }
+              std::cout << "YY 478\n";
+          header.SetSource(Ipv4Address::Ipv4Address("10.0.0.1"));// (route->GetSource ());
+          std::cout << "YY 471 UDP Send Successfully\n";
           m_udp->Send (p->Copy (), header.GetSource (), header.GetDestination (),
                        m_endPoint->GetLocalPort (), port, route);
           NotifyDataSent (p->GetSize ());
           return p->GetSize ();
         }
-      else 
+      else
         {
+          std::cout << "YY 479 No route to destination.\n";
           NS_LOG_LOGIC ("No route to destination");
           NS_LOG_ERROR (errno_);
           m_errno = errno_;
@@ -494,7 +516,7 @@ UdpSocketImpl::GetTxAvailable (void) const
   return MAX_IPV4_UDP_DATAGRAM_SIZE;
 }
 
-int 
+int
 UdpSocketImpl::SendTo (Ptr<Packet> p, uint32_t flags, const Address &address)
 {
   NS_LOG_FUNCTION (this << p << flags << address);
@@ -508,7 +530,7 @@ uint32_t
 UdpSocketImpl::GetRxAvailable (void) const
 {
   NS_LOG_FUNCTION_NOARGS ();
-  // We separately maintain this state to avoid walking the queue 
+  // We separately maintain this state to avoid walking the queue
   // every time this might be called
   return m_rxAvailable;
 }
@@ -523,20 +545,20 @@ UdpSocketImpl::Recv (uint32_t maxSize, uint32_t flags)
       return 0;
     }
   Ptr<Packet> p = m_deliveryQueue.front ();
-  if (p->GetSize () <= maxSize) 
+  if (p->GetSize () <= maxSize)
     {
       m_deliveryQueue.pop ();
       m_rxAvailable -= p->GetSize ();
     }
   else
     {
-      p = 0; 
+      p = 0;
     }
   return p;
 }
 
 Ptr<Packet>
-UdpSocketImpl::RecvFrom (uint32_t maxSize, uint32_t flags, 
+UdpSocketImpl::RecvFrom (uint32_t maxSize, uint32_t flags,
                          Address &fromAddress)
 {
   NS_LOG_FUNCTION (this << maxSize << flags);
@@ -572,7 +594,7 @@ UdpSocketImpl::GetSockName (Address &address) const
   return 0;
 }
 
-int 
+int
 UdpSocketImpl::MulticastJoinGroup (uint32_t interface, const Address &groupAddress)
 {
   NS_LOG_FUNCTION (interface << groupAddress);
@@ -584,17 +606,17 @@ UdpSocketImpl::MulticastJoinGroup (uint32_t interface, const Address &groupAddre
    5) call ipv4->MulticastJoinGroup () or Ipv6->MulticastJoinGroup ()
   */
   return 0;
-} 
+}
 
-int 
-UdpSocketImpl::MulticastLeaveGroup (uint32_t interface, const Address &groupAddress) 
+int
+UdpSocketImpl::MulticastLeaveGroup (uint32_t interface, const Address &groupAddress)
 {
   NS_LOG_FUNCTION (interface << groupAddress);
   /*
    1) sanity check interface
    2) determine address family of groupAddress
    3) delete from local list of (interface, groupAddress); raise a LOG_WARN
-      if not already present (but return 0) 
+      if not already present (but return 0)
    5) call ipv4->MulticastLeaveGroup () or Ipv6->MulticastLeaveGroup ()
   */
   return 0;
@@ -618,7 +640,7 @@ UdpSocketImpl::BindToNetDevice (Ptr<NetDevice> netdevice)
   return;
 }
 
-void 
+void
 UdpSocketImpl::ForwardUp (Ptr<Packet> packet, Ipv4Header header, uint16_t port,
                           Ptr<Ipv4Interface> incomingInterface)
 {
@@ -661,7 +683,7 @@ UdpSocketImpl::ForwardUp (Ptr<Packet> packet, Ipv4Header header, uint16_t port,
 }
 
 void
-UdpSocketImpl::ForwardIcmp (Ipv4Address icmpSource, uint8_t icmpTtl, 
+UdpSocketImpl::ForwardIcmp (Ipv4Address icmpSource, uint8_t icmpTtl,
                             uint8_t icmpType, uint8_t icmpCode,
                             uint32_t icmpInfo)
 {
@@ -674,72 +696,72 @@ UdpSocketImpl::ForwardIcmp (Ipv4Address icmpSource, uint8_t icmpTtl,
 }
 
 
-void 
+void
 UdpSocketImpl::SetRcvBufSize (uint32_t size)
 {
   m_rcvBufSize = size;
 }
 
-uint32_t 
+uint32_t
 UdpSocketImpl::GetRcvBufSize (void) const
 {
   return m_rcvBufSize;
 }
 
-void 
+void
 UdpSocketImpl::SetIpTtl (uint8_t ipTtl)
 {
   m_ipTtl = ipTtl;
 }
 
-uint8_t 
+uint8_t
 UdpSocketImpl::GetIpTtl (void) const
 {
   return m_ipTtl;
 }
 
-void 
+void
 UdpSocketImpl::SetIpMulticastTtl (uint8_t ipTtl)
 {
   m_ipMulticastTtl = ipTtl;
 }
 
-uint8_t 
+uint8_t
 UdpSocketImpl::GetIpMulticastTtl (void) const
 {
   return m_ipMulticastTtl;
 }
 
-void 
+void
 UdpSocketImpl::SetIpMulticastIf (int32_t ipIf)
 {
   m_ipMulticastIf = ipIf;
 }
 
-int32_t 
+int32_t
 UdpSocketImpl::GetIpMulticastIf (void) const
 {
   return m_ipMulticastIf;
 }
 
-void 
+void
 UdpSocketImpl::SetIpMulticastLoop (bool loop)
 {
   m_ipMulticastLoop = loop;
 }
 
-bool 
+bool
 UdpSocketImpl::GetIpMulticastLoop (void) const
 {
   return m_ipMulticastLoop;
 }
 
-void 
+void
 UdpSocketImpl::SetMtuDiscover (bool discover)
 {
   m_mtuDiscover = discover;
 }
-bool 
+bool
 UdpSocketImpl::GetMtuDiscover (void) const
 {
   return m_mtuDiscover;

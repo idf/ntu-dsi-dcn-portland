@@ -79,7 +79,7 @@ DefaultSimulatorImpl::DoDispose (void)
 void
 DefaultSimulatorImpl::Destroy ()
 {
-  while (!m_destroyEvents.empty ()) 
+  while (!m_destroyEvents.empty ())
     {
       Ptr<EventImpl> ev = m_destroyEvents.front ().PeekEventImpl ();
       m_destroyEvents.pop_front ();
@@ -108,7 +108,7 @@ DefaultSimulatorImpl::SetScheduler (ObjectFactory schedulerFactory)
 }
 
 // System ID for non-distributed simulation is always zero
-uint32_t 
+uint32_t
 DefaultSimulatorImpl::GetSystemId (void) const
 {
   return 0;
@@ -130,7 +130,7 @@ DefaultSimulatorImpl::ProcessOneEvent (void)
   next.impl->Unref ();
 }
 
-bool 
+bool
 DefaultSimulatorImpl::IsFinished (void) const
 {
   return m_events->IsEmpty () || m_stop;
@@ -153,8 +153,9 @@ DefaultSimulatorImpl::Next (void) const
 void
 DefaultSimulatorImpl::Run (void)
 {
+//　std::cout << "YY Run run run\n";
   m_stop = false;
-  while (!m_events->IsEmpty () && !m_stop) 
+  while (!m_events->IsEmpty () && !m_stop)
     {
       ProcessOneEvent ();
     }
@@ -170,13 +171,13 @@ DefaultSimulatorImpl::RunOneEvent (void)
   ProcessOneEvent ();
 }
 
-void 
+void
 DefaultSimulatorImpl::Stop (void)
 {
   m_stop = true;
 }
 
-void 
+void
 DefaultSimulatorImpl::Stop (Time const &time)
 {
   Simulator::Schedule (time, &Simulator::Stop);
@@ -247,7 +248,7 @@ DefaultSimulatorImpl::Now (void) const
   return TimeStep (m_currentTs);
 }
 
-Time 
+Time
 DefaultSimulatorImpl::GetDelayLeft (const EventId &id) const
 {
   if (IsExpired (id))
@@ -326,7 +327,7 @@ DefaultSimulatorImpl::IsExpired (const EventId &ev) const
       ev.GetTs () < m_currentTs ||
       (ev.GetTs () == m_currentTs &&
        ev.GetUid () <= m_currentUid) ||
-      ev.PeekEventImpl ()->IsCancelled ()) 
+      ev.PeekEventImpl ()->IsCancelled ())
     {
       return true;
     }
@@ -336,7 +337,7 @@ DefaultSimulatorImpl::IsExpired (const EventId &ev) const
     }
 }
 
-Time 
+Time
 DefaultSimulatorImpl::GetMaximumSimulationTime (void) const
 {
   // XXX: I am fairly certain other compilers use other non-standard

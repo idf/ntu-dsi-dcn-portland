@@ -189,6 +189,9 @@ int main(int argc, char *argv[]) {
     swRand = rand() % num_edge + 0;
     hostRand = rand() % num_host + 0;
     hostRand = hostRand + 2; // why add 2? due to bridge
+//    podRand = 0;
+//    swRand = 0;
+//    hostRand = 1;
     char *add;
     add = toString(10, podRand, swRand, hostRand);
 
@@ -214,6 +217,10 @@ int main(int argc, char *argv[]) {
       rand2 = rand() % num_edge + 0;
       rand3 = rand() % num_host + 0;
     } // to make sure that client and server are different
+
+   // rand1 = 0;
+   // rand2 = 0;
+   // rand3 = 1;
 
     // Install On/Off Application to the client
     NodeContainer onoff;
@@ -265,7 +272,7 @@ int main(int argc, char *argv[]) {
 
         // Assign PMAC
         Mac48Address pmac = Mac48Address(toPMAC(i, j, h, 1));
-        Ipv4Address ip = Ipv4Address(toString(10, i, j, h));
+        Ipv4Address ip = Ipv4Address(toString(10, i, j, h + 1));
         link1.Get(1)->SetAddress(pmac);
         macIpMap.insert(pair<Mac48Address, Ipv4Address>(pmac, ip));
         ipMacMap.insert(pair<Ipv4Address, Mac48Address>(ip, pmac));
@@ -427,7 +434,7 @@ int main(int argc, char *argv[]) {
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor = flowmon.InstallAll();
   // Run simulation.
-  //
+  Packet::EnablePrinting();
   NS_LOG_INFO("Run Simulation.");
   Simulator::Stop(Seconds(101.0));
   Simulator::Run();
@@ -440,6 +447,25 @@ int main(int argc, char *argv[]) {
 
   Simulator::Destroy();
   NS_LOG_INFO("Done.");
+
+////  NodeContainer host[num_pod][num_bridge]; // NodeContainer for hosts
+//  for (i = 0; i < k; i++) {
+//    for (j = 0; j < num_bridge; j++) {
+////      std::cout << (host[i][j].Get(0))->GetId() << std::endl;
+////      std::cout << (host[i][j].Get(1))->GetId() << std::endl;
+//
+//    }
+//std::cout << (edge[i].Get(0))->GetId() << std::endl;
+//std::cout << (edge[i].Get(1))->GetId() << std::endl;
+//std::cout << (agg[i].Get(0))->GetId() << std::endl;
+//std::cout << (agg[i].Get(1))->GetId() << std::endl;
+//if(i<2)
+//{
+//std::cout << (core[i].Get(0))->GetId() << std::endl;
+//std::cout << (core[i].Get(1))->GetId() << std::endl;
+//
+//}
+//  }
 
   return 0;
 }
