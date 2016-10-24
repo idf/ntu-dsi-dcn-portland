@@ -987,6 +987,7 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
   Ipv4Address nw_dst_addr(ntohl(key.flow.nw_dst));
   Ipv4Address nw_src_addr(ntohl(key.flow.nw_src));
   std::cout << "YY IP src: "  <<nw_src_addr<< " " << "dst" << nw_dst_addr<< std::endl;
+  std::cout<<"level: "<<m_level<<std::endl;
   uint8_t pmac[6];
 
   std::stringstream ss;
@@ -1005,7 +1006,7 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
     dl_dst_addr.CopyFrom (key.flow.dl_dst);
     for(std::map<std::string, Mac48Address>::iterator itr = IP_MAC_MAP.begin(); itr != IP_MAC_MAP.end(); itr++) {
       std::cout<<itr->first<< "<=>" << itr -> second <<std::endl;
-      std::cout<<"level: "<<m_level<<std::endl;
+
     }
   }
   NS_LOG_INFO("**************************8");
