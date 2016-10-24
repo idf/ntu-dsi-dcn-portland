@@ -297,7 +297,7 @@ int main(int argc, char *argv[]) {
       edgeSwtchs[i][j]->m_pod = i;
       edgeSwtchs[i][j]->m_pos = j;
       edgeSwtchs[i][j]->m_level = 0;
-      edgeSwtchs[i][j]->IP_MAC_MAP = ipMacMap;
+      
 
       for (h = 0; h < num_host; h++) {
         edgeSwtchs[i][j]->m_port_dir.insert(make_pair(h, false));
@@ -313,6 +313,14 @@ int main(int argc, char *argv[]) {
       //      ipContainer[i][j] = address.Assign(hostDevices[i][j]);
     }
   }
+  
+  for (i = 0; i < num_pod; i++) {
+    for (j = 0; j < num_edge; j++) {
+      edgeSwtchs[i][j]->IP_MAC_MAP = ipMacMap;
+    }
+  }
+
+
   //  // BridgeHelper bHelper;
   //  // bHelper.Install (bridge[i].Get(j), bridgeDevices[i][j]);
   //  // Assign address
@@ -334,7 +342,7 @@ int main(int argc, char *argv[]) {
   internet.Install(terminalNodes);
   address.Assign(terminalNetDevices);
 
-  for (map<Ipv4Address, Mac48Address>::iterator it = ipMacMap.begin();
+  for (map<string, Mac48Address>::iterator it = ipMacMap.begin();
        it != ipMacMap.end(); it++) {
     cout << it->first << " <=>" << it->second << endl;
   }

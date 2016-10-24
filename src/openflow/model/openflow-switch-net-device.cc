@@ -18,6 +18,7 @@
 #ifdef NS3_OPENFLOW
 
 #include "openflow-switch-net-device.h"
+#include <string>
 
 NS_LOG_COMPONENT_DEFINE ("OpenFlowSwitchNetDevice");
 
@@ -987,13 +988,25 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
   Ipv4Address nw_src_addr(ntohl(key.flow.nw_src));
   std::cout << "YY IP src: "  <<nw_src_addr<< " " << "dst" << nw_dst_addr<< std::endl;
   uint8_t pmac[6];
-  if(IP_MAC_MAP.count(nw_dst_addr)) {
+
+  std::stringstream ss;
+
+  nw_dst_addr.Print(ss);
+  std::string string_nw_dst;
+  ss>>string_nw_dst;
+  std::cout<<"SSSSSSSSSSSSSSSSSString nw dst:"<<string_nw_dst<<std::endl;
+
+  if(IP_MAC_MAP.find(string_nw_dst) != IP_MAC_MAP.end()) {
     NS_LOG_INFO("Portland switch: can find the map from IP to PMAC.");
-    dl_dst_addr = IP_MAC_MAP[nw_dst_addr];
+    dl_dst_addr = IP_MAC_MAP[string_nw_dst];
   } else {
     NS_LOG_INFO("Portland switch: can't find the map from IP to PMAC.");
     //std::cout<<"FUCK!!!!!!!"<<key.flow.nw_dst<<std::endl;
     dl_dst_addr.CopyFrom (key.flow.dl_dst);
+    for(std::map<std::string, Mac48Address>::iterator itr = IP_MAC_MAP.begin(); itr != IP_MAC_MAP.end(); itr++) {
+      std::cout<<itr->first<< "<=>" << itr -> second <<std::endl;
+      std::cout<<"level: "<<m_level<<std::endl;
+    }
   }
   NS_LOG_INFO("**************************8");
   NS_LOG_INFO(m_level);
@@ -1001,10 +1014,17 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
 
   dl_dst_addr.CopyTo(pmac);
 
+  std::cout<<"~~~~ Lets Print:~~~~~~\n";
+  for(int i = 0; i < 6; i++) {
+    std::cout<<(int)pmac[i]<<std::endl;
+  }
+
   // Extract dst position info from PMAC.
-  int dst_pod = (((int)pmac[0]) << 6 ) + (int)pmac[1];
+  int dst_pod = (((int)pmac[0]) << 8 ) + (int)pmac[1] - 1;
   int dst_pos = (int)pmac[2];
   int dst_port = (int)pmac[3];
+
+  std::cout<<"!!!!!!!!!!!!!!!!!dst_pod: "<<dst_pod<<" dst_pos"<<dst_pos<<" dst_port "<<dst_port<<std::endl;
   // int dst_umid = (((int)pmac[4]) << 6 ) + (int)pmac[5]; // No use right now.
 
   // Construct the out-port for the package.
