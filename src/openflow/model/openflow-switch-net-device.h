@@ -48,6 +48,7 @@
 #include <vector>
 #include <utility>
 #include <stdlib.h>
+#include <string>
 
 #include "openflow-interface.h"
 
@@ -83,7 +84,7 @@ namespace ns3 {
  */
 
 /**
- * \ingroup openflow 
+ * \ingroup openflow
  * \brief A net device that switches multiple LAN segments via an OpenFlow-compatible flow table
  */
 class OpenFlowSwitchNetDevice : public NetDevice
@@ -98,7 +99,7 @@ public:
   std::map<int, bool> m_port_dir; // Port direction. True -> Up, False->Down
 
   static TypeId GetTypeId (void);
-  std::map<Ipv4Address, Mac48Address> IP_MAC_MAP;
+  std::map<std::string, Mac48Address> IP_MAC_MAP;
 
   /**
    * \name OpenFlowSwitchNetDevice Description Data
@@ -258,7 +259,7 @@ protected:
 
   /**
    * \internal
-   * 
+   *
    * Called when a packet is received on one of the switch's ports.
    *
    * \param netdev The port the packet was received on.
@@ -309,7 +310,7 @@ private:
 
   /**
    * \internal
-   * 
+   *
    * Send packets out all the ports except the originating one
    *
    * \param packet_uid Packet UID; used to fetch the packet and its metadata.
@@ -321,7 +322,7 @@ private:
 
   /**
    * \internal
-   * 
+   *
    * Sends a copy of the Packet over the provided output port
    *
    * \param packet_uid Packet UID; used to fetch the packet and its metadata.
@@ -344,8 +345,8 @@ private:
   void OutputPort (uint32_t packet_uid, int in_port, int out_port, bool ignore_no_fwd);
 
   /**
-   * \internal 
-   * 
+   * \internal
+   *
    * Sends a copy of the Packet to the controller. If the packet can be saved
    * in an OpenFlow buffer, then only the first 'max_len' bytes of the packet
    * are sent; otherwise, all of the packet is sent.
@@ -359,7 +360,7 @@ private:
 
   /**
    * \internal
-   * 
+   *
    * If an error message happened during the controller's request, send it to the controller.
    *
    * \param type The type of error.
@@ -371,7 +372,7 @@ private:
 
   /**
    * \internal
-   * 
+   *
    * Send a reply about this OpenFlow switch's features to the controller.
    *
    * List of capabilities and actions to support are found in the specification
@@ -469,7 +470,7 @@ private:
    * \param buffer Buffer of the packet received.
    * \param packet_uid Packet UID; used to fetch the packet and its metadata.
    * \param port The port the packet was received over.
-   * \param send_to_controller 
+   * \param send_to_controller
    */
   void FlowTableLookup (sw_flow_key key, ofpbuf* buffer, uint32_t packet_uid, int port, bool send_to_controller);
 

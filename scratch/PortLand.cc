@@ -67,8 +67,8 @@ char *toString(int a, int b, int c, int d) {
 }
 
 // Fabric Manager
-typedef map<Mac48Address, Ipv4Address> MacIpMap;
-typedef map<Ipv4Address, Mac48Address> IpMacMap;
+typedef map<Mac48Address, string> MacIpMap;
+typedef map<string, Mac48Address> IpMacMap;
 MacIpMap macIpMap;
 IpMacMap ipMacMap;
 
@@ -274,10 +274,11 @@ int main(int argc, char *argv[]) {
 
         // Assign PMAC
         Mac48Address pmac = Mac48Address(toPMAC(i + 1, j, h, 1));
-        Ipv4Address ip = Ipv4Address(toString(10, 0, 0, ++cnt));
+        // Ipv4Address ip = Ipv4Address(toString(10, 0, 0, ++cnt));
+        string ip = toString(10, 0, 0, ++cnt);
         link1.Get(1)->SetAddress(pmac);
-        macIpMap.insert(pair<Mac48Address, Ipv4Address>(pmac, ip));
-        ipMacMap.insert(pair<Ipv4Address, Mac48Address>(ip, pmac));
+        macIpMap.insert(pair<Mac48Address, string>(pmac, ip));
+        ipMacMap.insert(pair<string, Mac48Address>(ip, pmac));
         // std::cout << i<< " " << j<< " "<<h << " " << host[i][j].Get(h) ->
         // GetDevice(1) -> GetAddress()<< std::endl;
         // std::cout << i<< " " << j<< " "<<h << " " << edge[i].Get(j) ->
