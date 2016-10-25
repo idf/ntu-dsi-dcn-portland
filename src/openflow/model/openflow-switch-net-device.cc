@@ -597,6 +597,7 @@ OpenFlowSwitchNetDevice::ReceiveFromDevice (Ptr<NetDevice> netdev, Ptr<const Pac
   NS_LOG_FUNCTION_NOARGS ();
   NS_LOG_INFO ("--------------------------------------------");
   NS_LOG_DEBUG ("UID is " << packet->GetUid ());
+  std::cout << "YY ReceiveFromDevice " << src << " " << dst << " " << packet << std::endl;
 
   if (!m_promiscRxCallback.IsNull ())
     {
@@ -606,13 +607,30 @@ OpenFlowSwitchNetDevice::ReceiveFromDevice (Ptr<NetDevice> netdev, Ptr<const Pac
   Mac48Address dst48 = Mac48Address::ConvertFrom (dst);
   NS_LOG_INFO ("Received packet from " << Mac48Address::ConvertFrom (src) << " looking for " << dst48);
   NS_LOG_INFO ("The packetType is " << packetType );
+  NS_LOG_INFO (PACKET_HOST);
   for (size_t i = 0; i < m_ports.size (); i++)
     {
       if (m_ports[i].netdev == netdev)
         {
           if (packetType == PACKET_HOST && dst48 == m_address)
             {
-              m_rxCallback (this, packet, protocol, src);
+                ofi::SwitchPacketMetadata data;
+                data.packet = packet->Copy ();
+
+                ofpbuf *buffer = BufferFromPacket (data.packet,src,dst,netdev->GetMtu (),protocol);
+                m_ports[i].rx_packets++;
+                m_ports[i].rx_bytes += buffer->size;
+                data.buffer = buffer;
+                uint32_t packet_uid = save_buffer (buffer);
+
+                data.protocolNumber = protocol;
+                data.src = Address (src);
+                data.dst = Address (dst);
+                m_packetData.insert (std::make_pair (packet_uid, data));
+
+                RunThroughFlowTable (packet_uid, i);
+
+              //m_rxCallback (this, packet, protocol, src);
             }
           else if (packetType == PACKET_BROADCAST || packetType == PACKET_MULTICAST || packetType == PACKET_OTHERHOST)
             {
@@ -933,7 +951,6 @@ OpenFlowSwitchNetDevice::SendFlowExpired (sw_flow *flow, enum ofp_flow_expired_r
   ofe->priority = htons (flow->priority);
   ofe->reason = reason;
   memset (ofe->pad, 0, sizeof ofe->pad);
-
   ofe->duration     = htonl (time_now () - flow->created);
   memset (ofe->pad2, 0, sizeof ofe->pad2);
   ofe->packet_count = htonll (flow->packet_count);
@@ -958,6 +975,9 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
   // instead, we forwarding the packet according to its PMAC and current switch's location.
   NS_LOG_INFO("Portland switch: forwarding packet using PMAC and my location.");
 
+  std::cout << "YY IP src: "  <<ntohl( key.flow.nw_src )<< " " << "dst" << ntohs( key.flow.nw_dst )<< std::endl;
+  //std::cout << "YY MAC src: " <<ntohl( key.flow.dl_src )<< " " << "dst" << ntohs( key.flow.dl_dst )<< std::endl;
+
   // Get the destination PMAC of this package.
   // sw_flow_key my_key;
   // my_key.wildcards = 0;
@@ -974,6 +994,10 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
     //std::cout<<"FUCK!!!!!!!"<<key.flow.nw_dst<<std::endl;
     dl_dst_addr.CopyFrom (key.flow.dl_dst);
   }
+  NS_LOG_INFO("**************************8");
+  NS_LOG_INFO(m_level);
+  NS_LOG_INFO("*************************88");
+
   dl_dst_addr.CopyTo(pmac);
 
   // Extract dst position info from PMAC.
@@ -1075,7 +1099,6 @@ OpenFlowSwitchNetDevice::RunThroughFlowTable (uint32_t packet_uid, int port, boo
       ofpbuf_delete (buffer);
       return;
     }
-
   // drop MPLS packets with TTL 1
   if (buffer->l2_5)
     {

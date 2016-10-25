@@ -247,7 +247,6 @@ UdpSocketImpl::Listen (void)
 int
 UdpSocketImpl::Send (Ptr<Packet> p, uint32_t flags)
 {
-  std::cout << "YY Send UDPSocketImpl\n";
   NS_LOG_FUNCTION (this << p << flags);
 
   if (!m_connected)
@@ -304,9 +303,7 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, const Address &address)
 int
 UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
 {
-  //p->EnablePrinting();
-//p->Print(std::cout);
-// std::cout << "YY Packet: " << (p->ToString()) << std::endl;
+  p->Print(std::cout);
   NS_LOG_FUNCTION (this << p << dest << port);
   if (m_boundnetdevice)
     {
@@ -335,7 +332,7 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
 
   Ptr<Ipv4> ipv4 = m_node->GetObject<Ipv4> ();
   //Ptr<NetDevice> ndv = m_node->GetDevice();
-  std::cout << "YY DoSend UDP " << dest << " " << dest.IsBroadcast(  )<< " " << port << m_node->GetId() <<std::endl;
+  std::cout << "YY DoSend UDP " << dest << " " << dest.IsBroadcast(  )<< " " << port << " " << m_node->GetId() <<std::endl;
       //ndv->GetAddress()  << "\n " //<< *ipv4 << std::endl;
   // Locally override the IP TTL for this socket
   // We cannot directly modify the TTL at this stage, so we set a Packet tag
@@ -411,7 +408,6 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
                                                      << " (mask is " << maski << ")");
               m_udp->Send (p->Copy (), addri, dest,
                            m_endPoint->GetLocalPort (), port);
-              std::cout << "YY 411 UDP Send Successfully\n";
               NotifyDataSent (p->GetSize ());
               NotifySend (GetTxAvailable ());
             }
@@ -423,7 +419,6 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
                                                      << " (mask is " << maski << ")");
               m_udp->Send (p->Copy (), addri, bcast,
                            m_endPoint->GetLocalPort (), port);
-              std::cout << "YY 423 UDP Send Successfully\n";
 
               NotifyDataSent (p->GetSize ());
               NotifySend (GetTxAvailable ());
@@ -436,7 +431,6 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
     {
       m_udp->Send (p->Copy (), m_endPoint->GetLocalAddress (), dest,
                    m_endPoint->GetLocalPort (), port, 0);
-      std::cout << "YY 436 UDP Send Successfully\n";
 
       NotifyDataSent (p->GetSize ());
       NotifySend (GetTxAvailable ());
@@ -452,19 +446,34 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
       Ptr<NetDevice> oif = m_boundnetdevice; //specify non-zero if bound to a specific device
       // TBD-- we could cache the route and just check its validity
       route = ipv4->GetRoutingProtocol ()->RouteOutput (p, header, oif, errno_);
-      if (1)//(route != 0)
+      //std::cout << "YY Route -- Dest: " << route->GetDestination() << " Source: " << route->GetSource() << " Gateway: " << route->GetGateway() << std::endl;
+     // if(route == 0)
+     // {
+     //     std::cout << "YY No Route here, build a presudo one"<< std::endl;
+     //     route =  new Ipv4Route();
+     //     route -> SetDestination( dest );
+
+     //     Ptr<NetDevice> opd = m_node -> GetDevice( 1 );
+     //     int32_t interface  = m_node -> GetObject<Ipv4>() -> GetInterfaceForDevice( m_node -> GetDevice(1) );
+     //     Ipv4Address src    = m_node -> GetObject<Ipv4>() -> GetAddress( interface, 0 ).GetLocal();
+
+     //     route -> SetSource( src );
+     //     route -> SetGateway( src );
+     //     route -> SetOutputDevice( opd );
+     // }
+     // else{
+     //     std::cout << "There is a route!!!!" << std::endl;
+     //     std::cout << route -> GetGateway() << std::endl;
+     // }
+      if(route != 0)
         {
           NS_LOG_LOGIC ("Route exists");
-          std::cout << "YY 455\n";
           if (!m_allowBroadcast)
             {
-          std::cout << "YY 458\n";
 
               uint32_t outputIfIndex = ipv4->GetInterfaceForDevice (route->GetOutputDevice ());
-              std::cout << "YY 461\n";
 
               uint32_t ifNAddr = ipv4->GetNAddresses (outputIfIndex);
-              std::cout << "YY 464\n";
 
               for (uint32_t addrI = 0; addrI < ifNAddr; ++addrI)
                 {
@@ -475,11 +484,15 @@ UdpSocketImpl::DoSendTo (Ptr<Packet> p, Ipv4Address dest, uint16_t port)
                       return -1;
                     }
                 }
-              std::cout << "YY 475\n";
 
             }
-              std::cout << "YY 478\n";
-          header.SetSource(Ipv4Address::Ipv4Address("10.0.0.1"));// (route->GetSource ());
+            std::cout << "YY other information " << header.GetDestination() << " " << m_endPoint->GetLocalPort() << " " << port << std::endl;
+            //Ptr<NetDevice> pnd = m_node -> GetDevice( 1 );
+            //int32_t interface = m_node->GetObject<Ipv4>() -> GetInterfaceForDevice( m_node -> GetDevice(1) );
+            //Ipv4InterfaceAddress ipv4address = m_node->GetObject<Ipv4>() -> GetAddress( interface, 0 );
+//          //  std::cout << "YY" << host[1][1].Get(0) -> GetDevice(1) ->GetAddress() << " " << ipv4address.GetLocal() << std::endl;
+            //header.SetSource(ipv4address.GetLocal());
+            header.SetSource(route->GetSource ());
           std::cout << "YY 471 UDP Send Successfully\n";
           m_udp->Send (p->Copy (), header.GetSource (), header.GetDestination (),
                        m_endPoint->GetLocalPort (), port, route);

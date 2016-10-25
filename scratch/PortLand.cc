@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
   for (i = 0; i < k; i++) {
     for (j = 0; j < num_bridge; j++) {
       host[i][j].Create(num_host);
-      internet.Install(host[i][j]);
+      //internet.Install(host[i][j]);
     }
   }
 
@@ -252,7 +252,7 @@ int main(int argc, char *argv[]) {
   // NetDeviceContainer bridgeDevices[num_pod][num_bridge];
   Ptr<OpenFlowSwitchNetDevice> edgeSwtchs[num_pod][num_edge];
   NetDeviceContainer hostDevices[num_pod][num_edge];
-  Ipv4InterfaceContainer ipContainer[num_pod][num_edge];
+//  Ipv4InterfaceContainer ipContainer[num_pod][num_edge];
 
   for (i = 0; i < num_pod; i++) {
     for (j = 0; j < num_edge; j++) {
@@ -271,13 +271,16 @@ int main(int argc, char *argv[]) {
         hostDevices[i][j].Add(link1.Get(1));
 
         // Assign PMAC
-        Mac48Address pmac = Mac48Address(toPMAC(i, j, h, 1));
+        Mac48Address pmac = Mac48Address(toPMAC(i + 1, j, h, 1));
         Ipv4Address ip = Ipv4Address(toString(10, i, j, h + 1));
         link1.Get(1)->SetAddress(pmac);
         macIpMap.insert(pair<Mac48Address, Ipv4Address>(pmac, ip));
         ipMacMap.insert(pair<Ipv4Address, Mac48Address>(ip, pmac));
+        //std::cout << i<< " " << j<< " "<<h << " " << host[i][j].Get(h) -> GetDevice(1) -> GetAddress()<< std::endl;
+        //std::cout << i<< " " << j<< " "<<h << " " << edge[i].Get(j) -> GetDevice(0) -> GetAddress() << std::endl;
+        host[i][j].Get(h) -> AddNextHopMac(  Mac48Address::ConvertFrom( edge[i].Get(j) -> GetDevice(0) -> GetAddress() ) );
       }
-      // add switch
+            // add switch
       Ptr<Node> switchNode = edge[i].Get(j);
       Ptr<ns3::ofi::LearningController> controller =
           CreateObject<ns3::ofi::LearningController>();
@@ -294,22 +297,51 @@ int main(int argc, char *argv[]) {
         edgeSwtchs[i][j]->m_port_dir.insert(make_pair(h, false));
         edgeSwtchs[i][j]->AddSwitchPort(hostSw[i][j].Get(h));
       }
-
       // BridgeHelper bHelper;
       // bHelper.Install (bridge[i].Get(j), bridgeDevices[i][j]);
       // Assign address
-      char *subnet;
-      subnet = toString(10, i, j, 0);
-      address.SetBase(subnet, "255.255.255.0");
-      // incremental assigned
-      ipContainer[i][j] = address.Assign(hostDevices[i][j]);
+//      char *subnet;
+//      subnet = toString(10, i, j, 0);
+//      address.SetBase(subnet, "255.255.255.0");
+
+//      ipContainer[i][j] = address.Assign(hostDevices[i][j]);
+
+
     }
   }
+    //  // BridgeHelper bHelper;
+    //  // bHelper.Install (bridge[i].Get(j), bridgeDevices[i][j]);
+    //  // Assign address
+     char *subnet;
+     subnet = toString(10, 0, 0, 0);
+     address.SetBase(subnet, "255.255.255.0");
+      // incremental assigned
+     NodeContainer terminalNodes;
+     NetDeviceContainer terminalNetDevices;
+     for( int i = 0; i < num_pod; ++i)
+     {
+         for( int j = 0; j< num_edge; ++j )
+         {
+             for( int h = 0; h < num_host; ++h )
+             {
+                 std::cout << "YY " << i << " " << j << " " << h << std::endl;
+                terminalNetDevices.Add( hostDevices[i][j].Get(h) );
+                terminalNodes.Add( host[i][j].Get(h)  );
+             }
+
+         }
+     }
+     internet.Install(terminalNodes);
+     address.Assign(terminalNetDevices);
+
   std::cout << "Finished connecting edge switches and hosts  "
             << "\n";
+//  int32_t interface = host[1][1].Get(0)->GetObject<Ipv4>() -> GetInterfaceForDevice( host[1][1].Get(0) -> GetDevice(1) );
+//  Ipv4InterfaceAddress ipv4address = host[1][1].Get(0)->GetObject<Ipv4>() -> GetAddress( interface, 0 );
+//  std::cout << "YY" << host[1][1].Get(0) -> GetDevice(1) ->GetAddress() << " " << ipv4address.GetLocal() << std::endl;
+//  return 0;
 
   //=========== Connect aggregate switches to edge switches ===========//
-  //
   NetDeviceContainer ae[num_pod][num_agg][num_edge];
   Ptr<OpenFlowSwitchNetDevice> aggSwtchs[num_pod][num_agg];
   // NetDeviceContainer aggSw[num_pod][num_agg];
@@ -444,28 +476,41 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Simulation finished "
             << "\n";
+  std::cout << host[1][1].Get(0)->GetDevice(0)->GetAddress()  << std::endl;
+  std::cout << host[1][1].Get(0)->GetDevice(1)->GetAddress()  << std::endl;
+  //  NodeContainer host[num_pod][num_bridge]; // NodeContainer for hosts
+//  for (i = 0; i < k; i++) {
+//    for (j = 0; j < num_bridge; j++) {
+//      std::cout << (host[i][j].Get(0))->GetId() << std::endl;
+//        if((host[i][j].Get(0))->GetId() == 26 )
+//        {
+//            std::cout << i << " " << j << " " << 0 << std::endl;
+//            std::cout << host[i][j].Get(0) -> GetDevice( 0 ) ->GetAddress() << std::endl;
+//
+//        }
+//     std::cout << (host[i][j].Get(1))->GetId() << std::endl;
+//     if((host[i][j].Get(1))->GetId() == 26 )
+//        {
+//             std::cout << i << " " << j <<" " << 1 << std::endl;
+//            //std::cout << host[i][j].Get(1) -> GetDevice( 0 ) ->GetAddress() << std::endl;
+//        }
+//
+//
+//    }
+////std::cout << (edge[i].Get(0))->GetId() << std::endl;
+////std::cout << (edge[i].Get(1))->GetId() << std::endl;
+////std::cout << (agg[i].Get(0))->GetId() << std::endl;
+////std::cout << (agg[i].Get(1))->GetId() << std::endl;
+////if(i<2)
+////{
+////std::cout << (core[i].Get(0))->GetId() << std::endl;
+////std::cout << (core[i].Get(1))->GetId() << std::endl;
+////
+////}
+//  }
 
   Simulator::Destroy();
   NS_LOG_INFO("Done.");
-
-////  NodeContainer host[num_pod][num_bridge]; // NodeContainer for hosts
-//  for (i = 0; i < k; i++) {
-//    for (j = 0; j < num_bridge; j++) {
-////      std::cout << (host[i][j].Get(0))->GetId() << std::endl;
-////      std::cout << (host[i][j].Get(1))->GetId() << std::endl;
-//
-//    }
-//std::cout << (edge[i].Get(0))->GetId() << std::endl;
-//std::cout << (edge[i].Get(1))->GetId() << std::endl;
-//std::cout << (agg[i].Get(0))->GetId() << std::endl;
-//std::cout << (agg[i].Get(1))->GetId() << std::endl;
-//if(i<2)
-//{
-//std::cout << (core[i].Get(0))->GetId() << std::endl;
-//std::cout << (core[i].Get(1))->GetId() << std::endl;
-//
-//}
-//  }
 
   return 0;
 }

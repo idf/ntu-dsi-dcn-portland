@@ -43,7 +43,7 @@ GlobalValue g_checksumEnabled  = GlobalValue ("ChecksumEnabled",
                                               BooleanValue (false),
                                               MakeBooleanChecker ());
 
-TypeId 
+TypeId
 Node::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::Node")
@@ -76,7 +76,7 @@ Node::Node()
 Node::Node(uint32_t sid)
   : m_id (0),
     m_sid (sid)
-{ 
+{
   Construct ();
 }
 
@@ -110,7 +110,7 @@ Node::AddDevice (Ptr<NetDevice> device)
   device->SetNode (this);
   device->SetIfIndex (index);
   device->SetReceiveCallback (MakeCallback (&Node::NonPromiscReceiveFromDevice, this));
-  Simulator::ScheduleWithContext (GetId (), Seconds (0.0), 
+  Simulator::ScheduleWithContext (GetId (), Seconds (0.0),
                                   &NetDevice::Start, device);
   NotifyDeviceAdded (device);
   return index;
@@ -122,36 +122,44 @@ Node::GetDevice (uint32_t index) const
                  " is out of range (only have " << m_devices.size () << " devices).");
   return m_devices[index];
 }
-uint32_t 
+uint32_t
 Node::GetNDevices (void) const
 {
   return m_devices.size ();
 }
 
-uint32_t 
+uint32_t
 Node::AddApplication (Ptr<Application> application)
 {
   uint32_t index = m_applications.size ();
   m_applications.push_back (application);
   application->SetNode (this);
-  Simulator::ScheduleWithContext (GetId (), Seconds (0.0), 
+  Simulator::ScheduleWithContext (GetId (), Seconds (0.0),
                                   &Application::Start, application);
   return index;
 }
-Ptr<Application> 
+Ptr<Application>
 Node::GetApplication (uint32_t index) const
 {
   NS_ASSERT_MSG (index < m_applications.size (), "Application index " << index <<
                  " is out of range (only have " << m_applications.size () << " applications).");
   return m_applications[index];
 }
-uint32_t 
+uint32_t
 Node::GetNApplications (void) const
 {
   return m_applications.size ();
 }
+void Node::AddNextHopMac (Mac48Address nextHopMac)
+{
+    m_nextHopMac = nextHopMac;
+}
+Mac48Address Node::GetNextHopMac(void) const
+{
+    return m_nextHopMac;
+}
 
-void 
+void
 Node::DoDispose ()
 {
   m_deviceAdditionListeners.clear ();
@@ -174,7 +182,7 @@ Node::DoDispose ()
   m_applications.clear ();
   Object::DoDispose ();
 }
-void 
+void
 Node::DoStart (void)
 {
   for (std::vector<Ptr<NetDevice> >::iterator i = m_devices.begin ();
@@ -194,7 +202,7 @@ Node::DoStart (void)
 }
 
 void
-Node::RegisterProtocolHandler (ProtocolHandler handler, 
+Node::RegisterProtocolHandler (ProtocolHandler handler,
                                uint16_t protocolType,
                                Ptr<NetDevice> device,
                                bool promiscuous)
@@ -282,7 +290,7 @@ Node::ReceiveFromDevice (Ptr<NetDevice> device, Ptr<const Packet> packet, uint16
       if (i->device == 0 ||
           (i->device != 0 && i->device == device))
         {
-          if (i->protocol == 0 || 
+          if (i->protocol == 0 ||
               i->protocol == protocol)
             {
               if (promiscuous == i->promiscuous)
@@ -295,7 +303,7 @@ Node::ReceiveFromDevice (Ptr<NetDevice> device, Ptr<const Packet> packet, uint16
     }
   return found;
 }
-void 
+void
 Node::RegisterDeviceAdditionListener (DeviceAdditionListener listener)
 {
   m_deviceAdditionListeners.push_back (listener);
@@ -306,7 +314,7 @@ Node::RegisterDeviceAdditionListener (DeviceAdditionListener listener)
       listener (*i);
     }
 }
-void 
+void
 Node::UnregisterDeviceAdditionListener (DeviceAdditionListener listener)
 {
   for (DeviceAdditionListenerList::iterator i = m_deviceAdditionListeners.begin ();
@@ -319,16 +327,16 @@ Node::UnregisterDeviceAdditionListener (DeviceAdditionListener listener)
          }
     }
 }
- 
-void 
+
+void
 Node::NotifyDeviceAdded (Ptr<NetDevice> device)
 {
   for (DeviceAdditionListenerList::iterator i = m_deviceAdditionListeners.begin ();
        i != m_deviceAdditionListeners.end (); i++)
     {
       (*i) (device);
-    }  
+    }
 }
- 
+
 
 } // namespace ns3

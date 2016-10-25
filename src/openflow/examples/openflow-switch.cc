@@ -121,7 +121,7 @@ main (int argc, char *argv[])
   NetDeviceContainer switchDevices;
   for (int i = 0; i < 4; i++)
     {
-      NetDeviceContainer link = csma.Install (NodeContainer (terminals.Get (i), csmaSwitch));
+      NetDeviceContainer link = csma.Install (NodeContainer (terminals.Get (i), csmaSwitch.Get(0)));
       terminalDevices.Add (link.Get (0));
       switchDevices.Add (link.Get (1));
     }

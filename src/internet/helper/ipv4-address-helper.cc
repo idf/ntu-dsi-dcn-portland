@@ -30,12 +30,12 @@ NS_LOG_COMPONENT_DEFINE ("Ipv4AddressHelper");
 
 namespace ns3 {
 
-Ipv4AddressHelper::Ipv4AddressHelper () 
+Ipv4AddressHelper::Ipv4AddressHelper ()
 {
   NS_LOG_FUNCTION_NOARGS ();
 
 //
-// Set the default values to an illegal state.  Do this so the client is 
+// Set the default values to an illegal state.  Do this so the client is
 // forced to think at least briefly about what addresses get used and what
 // is going on here.
 //
@@ -48,7 +48,7 @@ Ipv4AddressHelper::Ipv4AddressHelper ()
 }
 
 Ipv4AddressHelper::Ipv4AddressHelper (
-  const Ipv4Address network, 
+  const Ipv4Address network,
   const Ipv4Mask    mask,
   const Ipv4Address address)
 {
@@ -58,7 +58,7 @@ Ipv4AddressHelper::Ipv4AddressHelper (
 
 void
 Ipv4AddressHelper::SetBase (
-  const Ipv4Address network, 
+  const Ipv4Address network,
   const Ipv4Mask mask,
   const Ipv4Address address)
 {
