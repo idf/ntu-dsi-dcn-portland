@@ -975,7 +975,6 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
   // instead, we forwarding the packet according to its PMAC and current switch's location.
   NS_LOG_INFO("Portland switch: forwarding packet using PMAC and my location.");
 
-  std::cout << "YY IP src: "  <<ntohl( key.flow.nw_src )<< " " << "dst" << ntohs( key.flow.nw_dst )<< std::endl;
   //std::cout << "YY MAC src: " <<ntohl( key.flow.dl_src )<< " " << "dst" << ntohs( key.flow.dl_dst )<< std::endl;
 
   // Get the destination PMAC of this package.
@@ -984,7 +983,9 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
   // flow_extract (buffer, -1, &my_key.flow);   // The second par isn't important: we don't care about in-port.
 
   Mac48Address dl_dst_addr;
-  Ipv4Address nw_dst_addr(key.flow.nw_dst);
+  Ipv4Address nw_dst_addr(ntohl(key.flow.nw_dst));
+  Ipv4Address nw_src_addr(ntohl(key.flow.nw_src));
+  std::cout << "YY IP src: "  <<nw_src_addr<< " " << "dst" << nw_dst_addr<< std::endl;
   uint8_t pmac[6];
   if(IP_MAC_MAP.count(nw_dst_addr)) {
     NS_LOG_INFO("Portland switch: can find the map from IP to PMAC.");
