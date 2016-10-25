@@ -255,6 +255,7 @@ int main(int argc, char *argv[]) {
   NetDeviceContainer hostDevices[num_pod][num_edge];
   //  Ipv4InterfaceContainer ipContainer[num_pod][num_edge];
 
+  int cnt = 0;
   for (i = 0; i < num_pod; i++) {
     for (j = 0; j < num_edge; j++) {
       // NetDeviceContainer link1 = csma.Install(NodeContainer (edge[i].Get(j),
@@ -273,7 +274,7 @@ int main(int argc, char *argv[]) {
 
         // Assign PMAC
         Mac48Address pmac = Mac48Address(toPMAC(i + 1, j, h, 1));
-        Ipv4Address ip = Ipv4Address(toString(10, i, j, h + 1));
+        Ipv4Address ip = Ipv4Address(toString(10, 0, 0, ++cnt));
         link1.Get(1)->SetAddress(pmac);
         macIpMap.insert(pair<Mac48Address, Ipv4Address>(pmac, ip));
         ipMacMap.insert(pair<Ipv4Address, Mac48Address>(ip, pmac));
@@ -316,7 +317,7 @@ int main(int argc, char *argv[]) {
   //  // Assign address
   char *subnet;
   subnet = toString(10, 0, 0, 0);
-  address.SetBase(subnet, "255.255.255.0");
+  address.SetBase(subnet, "255.0.0.0");
   // incremental assigned
   NodeContainer terminalNodes;
   NetDeviceContainer terminalNetDevices;
@@ -331,6 +332,11 @@ int main(int argc, char *argv[]) {
   }
   internet.Install(terminalNodes);
   address.Assign(terminalNetDevices);
+
+  for (map<Ipv4Address, Mac48Address>::iterator it = ipMacMap.begin();
+       it != ipMacMap.end(); it++) {
+    cout << it->first << " <=>" << it->second << endl;
+  }
 
   std::cout << "Finished connecting edge switches and hosts  "
             << "\n";
