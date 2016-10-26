@@ -636,7 +636,7 @@ OpenFlowSwitchNetDevice::ReceiveFromDevice (Ptr<NetDevice> netdev, Ptr<const Pac
                 m_ports[i].rx_bytes += buffer->size;
                 data.buffer = buffer;
                 uint32_t packet_uid = save_buffer (buffer);
-
+                packet_uid = packet->GetUid();
                 data.protocolNumber = protocol;
                 data.src = Address (src);
                 data.dst = Address (dst);

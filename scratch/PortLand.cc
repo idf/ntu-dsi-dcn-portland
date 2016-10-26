@@ -324,7 +324,7 @@ int main(int argc, char *argv[]) {
     for (j = 0; j < num_edge; j++) {
       edgeSwtchs[i][j]->IP_MAC_MAP = ipMacMap;
       for( h = 0; h < num_host; h++) {
-          host[i][j].Get(0)->IP_MAC_MAP = ipMacMap;
+          host[i][j].Get(h)->IP_MAC_MAP = ipMacMap;
       }
     }
   }
@@ -492,7 +492,7 @@ int main(int argc, char *argv[]) {
   std::cout << "Start Simulation.. "
             << "\n";
   //total_host = 1;// DEBUG YY
-  double stop_time = 10;//100.0;
+  double stop_time = 100.0;
   for (i = 0; i < total_host; i++) {
     app[i].Start(Seconds(0.0));
     app[i].Stop(Seconds(stop_time));
