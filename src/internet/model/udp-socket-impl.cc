@@ -598,6 +598,7 @@ UdpSocketImpl::RecvFrom (uint32_t maxSize, uint32_t flags,
       (void) found;
       fromAddress = tag.GetAddress ();
     }
+  std::cout <<"$$$$$$$$$$$$$$$$$$$$$$$$44Received::" << packet->GetUid() << std::endl;
   return packet;
 }
 

@@ -28,7 +28,7 @@
 #include "ns3/ptr.h"
 #include "ns3/net-device.h"
 #include "ns3/mac48-address.h"
-
+#include "map"
 namespace ns3 {
 
 class Application;
@@ -56,6 +56,8 @@ class Address;
 class Node : public Object
 {
 public:
+    std::map<std::string, Mac48Address> IP_MAC_MAP;
+
   static TypeId GetTypeId (void);
 
   /**

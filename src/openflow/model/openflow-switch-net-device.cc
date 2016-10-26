@@ -1089,6 +1089,7 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
   actions[0].len = 16;
   actions[0].port = output_port;
   NS_LOG_INFO("YY Try to call ExecuteActions");
+  NS_LOG_INFO(output_port);
   // Forwarding package.
   ofi::ExecuteActions(this, packet_uid, buffer, &key, (ofp_action_header *)actions, 16, false);
   NS_LOG_INFO("YY PortlandFlowTableLookup Done");

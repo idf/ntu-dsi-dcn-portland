@@ -210,21 +210,21 @@ Ipv4Interface::Send (Ptr<Packet> p, Ipv4Address dest)
     }
   std::cout<<"YY 210\n";
   // is this packet aimed at a local interface ?
-//  for (Ipv4InterfaceAddressListCI i = m_ifaddrs.begin (); i != m_ifaddrs.end (); ++i)
-//    {
-//        std::cout << dest << " " << *i << std::endl;
-//      if (dest == (*i).GetLocal ())
-//        {
-//          Ptr<Ipv4L3Protocol> ipv4 = m_node->GetObject<Ipv4L3Protocol> ();
-//
-//          ipv4->Receive (m_device, p, Ipv4L3Protocol::PROT_NUMBER,
-//                         m_device->GetBroadcast (),
-//                         m_device->GetBroadcast (),
-//                         NetDevice::PACKET_HOST // note: linux uses PACKET_LOOPBACK here
-//                         );
-//          return;
-//        }
-//    }
+  for (Ipv4InterfaceAddressListCI i = m_ifaddrs.begin (); i != m_ifaddrs.end (); ++i)
+    {
+        std::cout << dest << " " << *i << std::endl;
+      if (dest == (*i).GetLocal ())
+        {
+          Ptr<Ipv4L3Protocol> ipv4 = m_node->GetObject<Ipv4L3Protocol> ();
+
+          ipv4->Receive (m_device, p, Ipv4L3Protocol::PROT_NUMBER,
+                         m_device->GetBroadcast (),
+                         m_device->GetBroadcast (),
+                         NetDevice::PACKET_HOST // note: linux uses PACKET_LOOPBACK here
+                         );
+          return;
+        }
+    }
   std::cout<<"YY 227\n";
   if (m_device->NeedsArp ())
     {
@@ -268,7 +268,13 @@ Ipv4Interface::Send (Ptr<Packet> p, Ipv4Address dest)
 //              found = arp->Lookup (p, dest, m_device, m_cache, &hardwareDestination);
 //            }
           found = true;
-          hardwareDestination = Mac48Address("00:04:01:01:00:01");//m_device -> opMac;
+          std::stringstream ss;
+          dest.Print(ss);
+          std::string string_dest;
+          ss>>string_dest;
+
+          hardwareDestination = m_node->IP_MAC_MAP[string_dest];//Mac48Address("00:04:01:01:00:01");//m_device -> opMac;
+          std::cout << "######################"<<hardwareDestination <<std::endl;
         }
 
       if (found)

@@ -3,7 +3,7 @@
 
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013 Nanyang Technological University 
+ * Copyright (c) 2013 Nanyang Technological University
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -43,7 +43,7 @@
 	- This work goes along with the paper "Towards Reproducible Performance Studies of Datacenter Network Architectures Using An Open-Source Simulation Approach"
 
 	- The code is constructed in the following order:
-		1. Creation of Node Containers 
+		1. Creation of Node Containers
 		2. Initialize settings for On/Off Application
 		3. Connect hosts to edge switches
 		4. Connect edge switches to aggregate switches
@@ -57,7 +57,7 @@
 		   (Note: there are k/2 group of core switch)
 
 	- On/Off Traffic of the simulation: addresses of client and server are randomly selected everytime
-	
+
 	- Simulation Settings:
                 - Number of pods (k): 4-24 (run the simulation with varying values of k)
                 - Number of nodes: 16-3456
@@ -72,7 +72,7 @@
 
         - Statistics Output:
                 - Flowmonitor XML output file: Fat-tree.xml is located in the /statistics folder
-            
+
 
 */
 
@@ -90,7 +90,7 @@ char * toString(int a,int b, int c, int d){
 	int fourth = d;
 
 	char *address =  new char[30];
-	char firstOctet[30], secondOctet[30], thirdOctet[30], fourthOctet[30];	
+	char firstOctet[30], secondOctet[30], thirdOctet[30], fourthOctet[30];
 	//address = firstOctet.secondOctet.thirdOctet.fourthOctet;
 
 	bzero(address,30);
@@ -113,7 +113,7 @@ char * toString(int a,int b, int c, int d){
 
 // Main function
 //
-int 
+int
 	main(int argc, char *argv[])
 {
 //=========== Define parameters based on value of k ===========//
@@ -126,25 +126,25 @@ int
 	int num_agg = (k/2);		// number of aggregation switch in a pod
 	int num_group = k/2;		// number of group of core switches
         int num_core = (k/2);		// number of core switch in a group
-	int total_host = k*k*k/4;	// number of hosts in the entire network	
+	int total_host = k*k*k/4;	// number of hosts in the entire network
 	char filename [] = "statistics/Fat-tree.xml";// filename for Flow Monitor xml output file
 
 // Define variables for On/Off Application
 // These values will be used to serve the purpose that addresses of server and client are selected randomly
 // Note: the format of host's address is 10.pod.switch.(host+2)
 //
-	int podRand = 0;	//	
+	int podRand = 0;	//
 	int swRand = 0;		// Random values for servers' address
 	int hostRand = 0;	//
 
 	int rand1 =0;		//
-	int rand2 =0;		// Random values for clients' address	
+	int rand2 =0;		// Random values for clients' address
 	int rand3 =0;		//
 
 // Initialize other variables
 //
-	int i = 0;	
-	int j = 0;	
+	int i = 0;
+	int j = 0;
 	int h = 0;
 
 // Initialize parameters for On/Off application
@@ -159,9 +159,9 @@ int
 	char dataRate [] = "1000Mbps";	// 1Gbps
 	int delay = 0.001;		// 0.001 ms
 
-	
+
 // Output some useful information
-//	
+//
 	std::cout << "Value of k =  "<< k<<"\n";
 	std::cout << "Total number of hosts =  "<< total_host<<"\n";
 	std::cout << "Number of hosts under each switch =  "<< num_host<<"\n";
@@ -169,41 +169,41 @@ int
 	std::cout << "------------- "<<"\n";
 
 // Initialize Internet Stack and Routing Protocols
-//	
+//
 	InternetStackHelper internet;
-	Ipv4NixVectorHelper nixRouting; 
+	Ipv4NixVectorHelper nixRouting;
 	Ipv4StaticRoutingHelper staticRouting;
 	Ipv4ListRoutingHelper list;
-	list.Add (staticRouting, 0);	
-	list.Add (nixRouting, 10);	
+	list.Add (staticRouting, 0);
+	list.Add (nixRouting, 10);
 	internet.SetRoutingHelper(list);
 
 //=========== Creation of Node Containers ===========//
 //
 	NodeContainer core[num_group];				// NodeContainer for core switches
-	for (i=0; i<num_group;i++){  	
+	for (i=0; i<num_group;i++){
 		core[i].Create (num_core);
-		internet.Install (core[i]);		
+		internet.Install (core[i]);
 	}
 	NodeContainer agg[num_pod];				// NodeContainer for aggregation switches
-	for (i=0; i<num_pod;i++){  	
+	for (i=0; i<num_pod;i++){
 		agg[i].Create (num_agg);
 		internet.Install (agg[i]);
 	}
 	NodeContainer edge[num_pod];				// NodeContainer for edge switches
-  	for (i=0; i<num_pod;i++){  	
+  	for (i=0; i<num_pod;i++){
 		edge[i].Create (num_bridge);
 		internet.Install (edge[i]);
 	}
 	NodeContainer bridge[num_pod];				// NodeContainer for edge bridges
-  	for (i=0; i<num_pod;i++){  	
+  	for (i=0; i<num_pod;i++){
 		bridge[i].Create (num_bridge);
 		internet.Install (bridge[i]);
 	}
 	NodeContainer host[num_pod][num_bridge];		// NodeContainer for hosts
   	for (i=0; i<k;i++){
-		for (j=0;j<num_bridge;j++){  	
-			host[i][j].Create (num_host);		
+		for (j=0;j<num_bridge;j++){
+			host[i][j].Create (num_host);
 			internet.Install (host[i][j]);
 		}
 	}
@@ -212,9 +212,9 @@ int
 //
 
 // Generate traffics for the simulation
-//	
+//
 	ApplicationContainer app[total_host];
-	for (i=0;i<total_host;i++){	
+	for (i=0;i<total_host;i++){
 	// Randomly select a server
 		podRand = rand() % num_pod + 0;
 		swRand = rand() % num_edge + 0;
@@ -225,10 +225,10 @@ int
 
 	// Initialize On/Off Application with addresss of server
 		OnOffHelper oo = OnOffHelper("ns3::UdpSocketFactory",Address(InetSocketAddress(Ipv4Address(add), port))); // ip address of server
-	        oo.SetAttribute("OnTime",RandomVariableValue(ExponentialVariable(1)));  
-	        oo.SetAttribute("OffTime",RandomVariableValue(ExponentialVariable(1))); 
+	        oo.SetAttribute("OnTime",RandomVariableValue(ExponentialVariable(1)));
+	        oo.SetAttribute("OffTime",RandomVariableValue(ExponentialVariable(1)));
  	        oo.SetAttribute("PacketSize",UintegerValue (packetSize));
- 	       	oo.SetAttribute("DataRate",StringValue (dataRate_OnOff));      
+ 	       	oo.SetAttribute("DataRate",StringValue (dataRate_OnOff));
 	        oo.SetAttribute("MaxBytes",StringValue (maxBytes));
 
 	// Randomly select a client
@@ -250,11 +250,11 @@ int
 	std::cout << "Finished creating On/Off traffic"<<"\n";
 
 // Inintialize Address Helper
-//	
+//
   	Ipv4AddressHelper address;
 
 // Initialize PointtoPoint helper
-//	
+//
 	PointToPointHelper p2p;
   	p2p.SetDeviceAttribute ("DataRate", StringValue (dataRate));
   	p2p.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (delay)));
@@ -266,21 +266,21 @@ int
   	csma.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (delay)));
 
 //=========== Connect edge switches to hosts ===========//
-//	
-	NetDeviceContainer hostSw[num_pod][num_bridge];		
-	NetDeviceContainer bridgeDevices[num_pod][num_bridge];	
+//
+	NetDeviceContainer hostSw[num_pod][num_bridge];
+	NetDeviceContainer bridgeDevices[num_pod][num_bridge];
 	Ipv4InterfaceContainer ipContainer[num_pod][num_bridge];
 
 	for (i=0;i<num_pod;i++){
 		for (j=0;j<num_bridge; j++){
 			NetDeviceContainer link1 = csma.Install(NodeContainer (edge[i].Get(j), bridge[i].Get(j)));
-			hostSw[i][j].Add(link1.Get(0));				
-			bridgeDevices[i][j].Add(link1.Get(1));			
+			hostSw[i][j].Add(link1.Get(0));
+			bridgeDevices[i][j].Add(link1.Get(1));
 
-			for (h=0; h< num_host;h++){			
+			for (h=0; h< num_host;h++){
 				NetDeviceContainer link2 = csma.Install (NodeContainer (host[i][j].Get(h), bridge[i].Get(j)));
-				hostSw[i][j].Add(link2.Get(0));			
-				bridgeDevices[i][j].Add(link2.Get(1));						
+				hostSw[i][j].Add(link2.Get(0));
+				bridgeDevices[i][j].Add(link2.Get(1));
 			}
 
 			BridgeHelper bHelper;
@@ -289,22 +289,22 @@ int
 			char *subnet;
 			subnet = toString(10, i, j, 0);
 			address.SetBase (subnet, "255.255.255.0");
-			ipContainer[i][j] = address.Assign(hostSw[i][j]);			
+			ipContainer[i][j] = address.Assign(hostSw[i][j]);
 		}
 	}
 	std::cout << "Finished connecting edge switches and hosts  "<< "\n";
 
 //=========== Connect aggregate switches to edge switches ===========//
 //
-	NetDeviceContainer ae[num_pod][num_agg][num_edge]; 	
+	NetDeviceContainer ae[num_pod][num_agg][num_edge];
 	Ipv4InterfaceContainer ipAeContainer[num_pod][num_agg][num_edge];
 	for (i=0;i<num_pod;i++){
 		for (j=0;j<num_agg;j++){
 			for (h=0;h<num_edge;h++){
 				ae[i][j][h] = p2p.Install(agg[i].Get(j), edge[i].Get(h));
 
-				int second_octet = i;		
-				int third_octet = j+(k/2);	
+				int second_octet = i;
+				int third_octet = j+(k/2);
 				int fourth_octet;
 				if (h==0) fourth_octet = 1;
 				else fourth_octet = h*2+1;
@@ -316,24 +316,24 @@ int
 				base = toString(0, 0, 0, fourth_octet);
 				address.SetBase (subnet, "255.255.255.0",base);
 				ipAeContainer[i][j][h] = address.Assign(ae[i][j][h]);
-			}			
-		}		
+			}
+		}
 	}
 	std::cout << "Finished connecting aggregation switches and edge switches  "<< "\n";
 
 //=========== Connect core switches to aggregate switches ===========//
 //
-	NetDeviceContainer ca[num_group][num_core][num_pod]; 		
+	NetDeviceContainer ca[num_group][num_core][num_pod];
 	Ipv4InterfaceContainer ipCaContainer[num_group][num_core][num_pod];
 	int fourth_octet =1;
-	
-	for (i=0; i<num_group; i++){		
+
+	for (i=0; i<num_group; i++){
 		for (j=0; j < num_core; j++){
 			fourth_octet = 1;
-			for (h=0; h < num_pod; h++){			
-				ca[i][j][h] = p2p.Install(core[i].Get(j), agg[h].Get(i)); 	
+			for (h=0; h < num_pod; h++){
+				ca[i][j][h] = p2p.Install(core[i].Get(j), agg[h].Get(i));
 
-				int second_octet = k+i;		
+				int second_octet = k+i;
 				int third_octet = j;
 				//Assign subnet
 				char *subnet;
@@ -356,7 +356,7 @@ int
 	std::cout << "Start Simulation.. "<<"\n";
 	for (i=0;i<total_host;i++){
 		app[i].Start (Seconds (0.0));
-  		app[i].Stop (Seconds (100.0));
+  		app[i].Stop (Seconds (2.0));
 	}
   	Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 // Calculate Throughput using Flowmonitor
@@ -366,7 +366,7 @@ int
 // Run simulation.
 //
   	NS_LOG_INFO ("Run Simulation.");
-  	Simulator::Stop (Seconds(101.0));
+  	Simulator::Stop (Seconds(3.0));
   	Simulator::Run ();
 
   	monitor->CheckForLostPackets ();

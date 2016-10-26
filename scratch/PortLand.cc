@@ -184,20 +184,21 @@ int main(int argc, char *argv[]) {
   //
   ApplicationContainer app[total_host];
 
-  //for (i = 0; i < total_host; i++) {
-  for ( i = 0; i < 1; ++i ){
+  for (i = 0; i < total_host; i++) {
+  //for ( i = 0; i < 1; ++i ){
     // Randomly select a server
-    // podRand = rand() % num_pod + 0;
-    // swRand = rand() % num_edge + 0;
-    // hostRand = rand() % num_host + 0;
-    // hostRand = hostRand + 2; // why add 2? due to bridge
-    // podRand = 0;
-    // swRand = 0;
-    // hostRand = 1;
+    podRand = rand() % num_pod + 0;
+    swRand = rand() % num_edge + 0;
+    hostRand = rand() % num_host + 0;
+    hostRand = hostRand + 2; // why add 2? due to bridge
+    podRand = 0;
+    swRand = 0;
+    hostRand = 1;
     char *add;
     // add = toString(10, podRand, swRand, hostRand);
-    ///YY add = toString(10, 0, 0, rand() % total_host + 1);
-    add = toString(10, 0, 0, 16);
+    int idx = rand() % total_host;
+    add = toString(10, 0, 0, idx + 1);
+    //add = toString(10, 0, 0, 16);
     // Initialize On/Off Application with addresss of server
     OnOffHelper oo =
         OnOffHelper("ns3::UdpSocketFactory",
@@ -215,15 +216,15 @@ int main(int argc, char *argv[]) {
     rand3 = rand() % num_host + 0;
 
     // +2
-    while (rand1 == podRand && swRand == rand2 && (rand3 + 2) == hostRand) {
+    while ((rand1 * num_edge * num_host + rand2 * num_host + rand3) == idx) {
       rand1 = rand() % num_pod + 0;
       rand2 = rand() % num_edge + 0;
       rand3 = rand() % num_host + 0;
     } // to make sure that client and server are different
 
-     rand1 = 0;
-     rand2 = 0;
-     rand3 = 1;
+    // rand1 = 0;
+    // rand2 = 0;
+    // rand3 = 1;
 
     // Install On/Off Application to the client
     NodeContainer onoff;
@@ -322,6 +323,9 @@ int main(int argc, char *argv[]) {
   for (i = 0; i < num_pod; i++) {
     for (j = 0; j < num_edge; j++) {
       edgeSwtchs[i][j]->IP_MAC_MAP = ipMacMap;
+      for( h = 0; h < num_host; h++) {
+          host[i][j].Get(0)->IP_MAC_MAP = ipMacMap;
+      }
     }
   }
 
@@ -487,8 +491,8 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Start Simulation.. "
             << "\n";
-  total_host = 1;// DEBUG YY
-  double stop_time = 2.0;//100.0;
+  //total_host = 1;// DEBUG YY
+  double stop_time = 10;//100.0;
   for (i = 0; i < total_host; i++) {
     app[i].Start(Seconds(0.0));
     app[i].Stop(Seconds(stop_time));

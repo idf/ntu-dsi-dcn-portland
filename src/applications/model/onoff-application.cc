@@ -239,6 +239,7 @@ void OnOffApplication::ScheduleStopEvent ()
 
 void OnOffApplication::SendPacket ()
 {
+  std::cout << "============================" << std::endl;
   std::cout << "YY SendPacket" << std::endl;
   NS_LOG_FUNCTION_NOARGS ();
   NS_LOG_LOGIC ("sending packet at " << Simulator::Now ());
