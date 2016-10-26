@@ -124,7 +124,7 @@ int
 	int n = 4;			// number of servers in one BCube;
 	int num_sw = pow (n,k);		// number of switch at each level (all levels have same number of switch) = n^k;
 	int num_host = num_sw*n;	// total number of host
-	char filename [] = "statistics/BCube-k1-10s.xml";	// filename for Flow Monitor xml output file
+	char filename [] = "statistics/BCube-k1-10s-1-1-8.xml";	// filename for Flow Monitor xml output file
 
 // Initialize other variables
 //
@@ -151,7 +151,7 @@ int
 
 // Initialize parameters for Csma protocol
 //
-	char dataRate [] = "1000Mbps";	// 1Gbps
+	char dataRate [] = "8000Mbps";	// 1Gbps
 	int delay = 0.001;		// 0.001 ms
 
 // Output some useful information
