@@ -215,17 +215,6 @@ int main(int argc, char *argv[]) {
         ipMacMap.insert(pair<string, Mac48Address>(ip, pmac));
         std::cout << host[i][j].Get(h)->GetNDevices() << " "
                   << edge[i].Get(j)->GetNDevices() << std::endl;
-
-        link1.Get(0)->opMac = Mac48Address::ConvertFrom(
-            host[i][j]
-                .Get(h)
-                ->GetDevice(host[i][j].Get(h)->GetNDevices() - 1)
-                ->GetAddress());
-        link1.Get(1)->opMac = Mac48Address::ConvertFrom(
-            edge[i]
-                .Get(j)
-                ->GetDevice(edge[i].Get(j)->GetNDevices() - 1)
-                ->GetAddress());
       }
       // add switch
       Ptr<Node> switchNode = edge[i].Get(j);
@@ -283,16 +272,6 @@ int main(int argc, char *argv[]) {
       for (h = 0; h < num_edge; h++) {
         ae[i][j][h] =
             csma.Install(NodeContainer(agg[i].Get(j), edge[i].Get(h)));
-        ae[i][j][h].Get(0)->opMac = Mac48Address::ConvertFrom(
-            edge[i]
-                .Get(j)
-                ->GetDevice(edge[i].Get(j)->GetNDevices() - 1)
-                ->GetAddress());
-        ae[i][j][h].Get(1)->opMac = Mac48Address::ConvertFrom(
-            agg[i]
-                .Get(j)
-                ->GetDevice(agg[i].Get(j)->GetNDevices() - 1)
-                ->GetAddress());
       }
       // add agg switch
       Ptr<Node> switchNode = agg[i].Get(j);
@@ -331,16 +310,6 @@ int main(int argc, char *argv[]) {
       for (h = 0; h < num_pod; h++) {
         ca[i][j][h] =
             csma.Install(NodeContainer(core[i].Get(j), agg[h].Get(i)));
-        ca[i][j][h].Get(0)->opMac = Mac48Address::ConvertFrom(
-            agg[i]
-                .Get(j)
-                ->GetDevice(agg[i].Get(j)->GetNDevices() - 1)
-                ->GetAddress());
-        ca[i][j][h].Get(1)->opMac = Mac48Address::ConvertFrom(
-            core[i]
-                .Get(j)
-                ->GetDevice(core[i].Get(j)->GetNDevices() - 1)
-                ->GetAddress());
       }
 
       // add switch
