@@ -251,6 +251,7 @@ int main(int argc, char *argv[]) {
       edgeSwtchs[i][j]->IP_MAC_MAP = ipMacMap;
       for (h = 0; h < num_host; h++) {
         host[i][j].Get(h)->IP_MAC_MAP = ipMacMap;
+      }
     }
   }
 
