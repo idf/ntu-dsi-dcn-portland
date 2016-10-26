@@ -127,7 +127,7 @@ int
 	int num_group = k/2;		// number of group of core switches
         int num_core = (k/2);		// number of core switch in a group
 	int total_host = k*k*k/4;	// number of hosts in the entire network	
-	char filename [] = "statistics/Fat-tree.xml";// filename for Flow Monitor xml output file
+	char filename [] = "statistics/Fat-tree-10.xml";// filename for Flow Monitor xml output file
 
 // Define variables for On/Off Application
 // These values will be used to serve the purpose that addresses of server and client are selected randomly
@@ -356,7 +356,7 @@ int
 	std::cout << "Start Simulation.. "<<"\n";
 	for (i=0;i<total_host;i++){
 		app[i].Start (Seconds (0.0));
-  		app[i].Stop (Seconds (100.0));
+  		app[i].Stop (Seconds (10.0));
 	}
   	Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 // Calculate Throughput using Flowmonitor
@@ -366,7 +366,7 @@ int
 // Run simulation.
 //
   	NS_LOG_INFO ("Run Simulation.");
-  	Simulator::Stop (Seconds(101.0));
+  	Simulator::Stop (Seconds(11.0));
   	Simulator::Run ();
 
   	monitor->CheckForLostPackets ();

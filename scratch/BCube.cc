@@ -120,11 +120,11 @@ int
 
 //=========== Define parameters based on value of k ===========//
 //
-	int k = 2;			// number of BCube level, For BCube with 3 levels, level0 to level2, k should be set as 2			
+	int k = 1;			// number of BCube level, For BCube with 3 levels, level0 to level2, k should be set as 2			
 	int n = 4;			// number of servers in one BCube;
 	int num_sw = pow (n,k);		// number of switch at each level (all levels have same number of switch) = n^k;
 	int num_host = num_sw*n;	// total number of host
-	char filename [] = "statistics/BCube.xml";	// filename for Flow Monitor xml output file
+	char filename [] = "statistics/BCube-k1-10s.xml";	// filename for Flow Monitor xml output file
 
 // Initialize other variables
 //
@@ -323,51 +323,51 @@ int
 
 //=========== Connect BCube 2 switches to hosts ===========//
 //
-	NetDeviceContainer hostSwDevices2[num_sw];		
-	NetDeviceContainer bridgeDevices2[num_sw];	
-	Ipv4InterfaceContainer ipContainer2[num_sw];
+	// NetDeviceContainer hostSwDevices2[num_sw];		
+	// NetDeviceContainer bridgeDevices2[num_sw];	
+	// Ipv4InterfaceContainer ipContainer2[num_sw];
 	
-	j = 0; temp = 0; 
-	int temp2 =n*n;
-	int temp3 = n*n*n;
+	// j = 0; temp = 0; 
+	// int temp2 =n*n;
+	// int temp3 = n*n*n;
 
-	for (i=0;i<num_sw;i++){
-		NetDeviceContainer link1 = csma.Install(NodeContainer (swB2.Get(i), bridgeB2.Get(i)));
-		hostSwDevices2[i].Add(link1.Get(0));			
-		bridgeDevices2[i].Add(link1.Get(1));
+	// for (i=0;i<num_sw;i++){
+	// 	NetDeviceContainer link1 = csma.Install(NodeContainer (swB2.Get(i), bridgeB2.Get(i)));
+	// 	hostSwDevices2[i].Add(link1.Get(0));			
+	// 	bridgeDevices2[i].Add(link1.Get(1));
 
-		if (i==0){
-			j = 0; 
-			temp = j;
-		}
+	// 	if (i==0){
+	// 		j = 0; 
+	// 		temp = j;
+	// 	}
 
-		if (i%temp2 !=0){
-			j = temp + 1;
-			temp = j;
-		}
+	// 	if (i%temp2 !=0){
+	// 		j = temp + 1;
+	// 		temp = j;
+	// 	}
 
-		if ((i%temp2 == 0)&&(i!=0)){
-			j = temp - temp2 + 1;
-			j = j + temp3;
-			temp = j;
-		}
+	// 	if ((i%temp2 == 0)&&(i!=0)){
+	// 		j = temp - temp2 + 1;
+	// 		j = j + temp3;
+	// 		temp = j;
+	// 	}
 
-		for (j=temp;j<temp+temp3; j=j+temp2){
-			NetDeviceContainer link2 = csma.Install(NodeContainer (host.Get(j), bridgeB2.Get(i)));
-			hostSwDevices2[i].Add(link2.Get(0));		
-			bridgeDevices2[i].Add(link2.Get(1)); 
-		}	
-		BridgeHelper bHelper2;
-		bHelper2.Install (bridgeB2.Get(i), bridgeDevices2[i]);	
-		//Assign address
-		char *subnet;
-		subnet = toString(10, 2, i, 0);
-		address.SetBase (subnet, "255.255.255.0");
-		ipContainer2[i] = address.Assign(hostSwDevices2[i]);
+	// 	for (j=temp;j<temp+temp3; j=j+temp2){
+	// 		NetDeviceContainer link2 = csma.Install(NodeContainer (host.Get(j), bridgeB2.Get(i)));
+	// 		hostSwDevices2[i].Add(link2.Get(0));		
+	// 		bridgeDevices2[i].Add(link2.Get(1)); 
+	// 	}	
+	// 	BridgeHelper bHelper2;
+	// 	bHelper2.Install (bridgeB2.Get(i), bridgeDevices2[i]);	
+	// 	//Assign address
+	// 	char *subnet;
+	// 	subnet = toString(10, 2, i, 0);
+	// 	address.SetBase (subnet, "255.255.255.0");
+	// 	ipContainer2[i] = address.Assign(hostSwDevices2[i]);
 		
-	}
-	std::cout <<"Fininshed BCube 2 connection"<<"\n";
-	std::cout << "------------- "<<"\n";
+	// }
+	// std::cout <<"Fininshed BCube 2 connection"<<"\n";
+	// std::cout << "------------- "<<"\n";
 
 //=========== Start the simulation ===========//
 //
@@ -375,7 +375,7 @@ int
 	std::cout << "Start Simulation.. "<<"\n";
 	for (i=0;i<num_host;i++){
 		app[i].Start (Seconds (0.0));
-  		app[i].Stop (Seconds (100.0));
+  		app[i].Stop (Seconds (10.0));
 	}
   	Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 // Calculate Throughput using Flowmonitor
@@ -385,7 +385,7 @@ int
 // Run simulation.
 //
   	NS_LOG_INFO ("Run Simulation.");
-  	Simulator::Stop (Seconds(101.0));
+  	Simulator::Stop (Seconds(11.0));
   	Simulator::Run ();
 
   	monitor->CheckForLostPackets ();
