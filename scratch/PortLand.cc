@@ -21,20 +21,6 @@ using namespace ns3;
 using namespace std;
 NS_LOG_COMPONENT_DEFINE("PortLand-Architecture");
 
-// Function to create MAC address string from numbers
-//
-char *toPMAC(int pod, int position, int port, int vmid) {
-  char *macAddress = new char[18];
-
-  if (pod <= 0xff && vmid <= 0xff)
-    sprintf(macAddress, "00:%02x:%02x:%02x:00:%02x", pod, position, port, vmid);
-  else
-    // Not implemented yet.
-    exit(1);
-
-  return macAddress;
-}
-
 // Function to create address string from numbers
 //
 char *toString(int a, int b, int c, int d) {
@@ -46,8 +32,6 @@ char *toString(int a, int b, int c, int d) {
 
   char *address = new char[30];
   char firstOctet[30], secondOctet[30], thirdOctet[30], fourthOctet[30];
-  // address = firstOctet.secondOctet.thirdOctet.fourthOctet;
-
   bzero(address, 30);
 
   snprintf(firstOctet, 10, "%d", first);
@@ -66,19 +50,26 @@ char *toString(int a, int b, int c, int d) {
   return address;
 }
 
-// Fabric Manager
-typedef map<Mac48Address, string> MacIpMap;
-typedef map<string, Mac48Address> IpMacMap;
-MacIpMap macIpMap;
-IpMacMap ipMacMap;
+// Function to create MAC address string from numbers
+//
+char *toPMACAddress(int pod, int position, int port, int vmid) {
+  char *add = new char[18];
+
+  if (pod <= 0xff && vmid <= 0xff) {
+    sprintf(add, "00:%02x:%02x:%02x:00:%02x", pod, position, port, vmid);
+  } else {
+    std::cout << "Not implemented yet" << std::endl;
+    exit(1);
+  }
+
+  return add;
+}
+
+map<string, Mac48Address> ipMacMap;
 
 // Main function
 //
 int main(int argc, char *argv[]) {
-  /*
-  export NS_LOG=PortLand-Architecture=level_all
-  export NS_LOG=OpenFlowSwitchNetDevice=level_all
-  */
   LogComponentEnable("PortLand-Architecture", LOG_LEVEL_INFO);
   LogComponentEnable("OpenFlowSwitchNetDevice", LOG_LEVEL_INFO);
 
@@ -97,14 +88,6 @@ int main(int argc, char *argv[]) {
       "statistics/PortLand.xml"; // filename for Flow Monitor xml output file
 
   // Define variables for On/Off Application
-  // These values will be used to serve the purpose that addresses of server and
-  // client are selected randomly
-  // Note: the format of host's address is 10.pod.switch.(host+2)
-  //
-  int podRand = 0;  //
-  int swRand = 0;   // Random values for servers' address
-  int hostRand = 0; //
-
   int rand1 = 0; //
   int rand2 = 0; // Random values for clients' address
   int rand3 = 0; //
@@ -139,41 +122,25 @@ int main(int argc, char *argv[]) {
   // Initialize Internet Stack and Routing Protocols
   //
   InternetStackHelper internet;
-  // Ipv4NixVectorHelper nixRouting;
-  // Ipv4StaticRoutingHelper staticRouting;
-  // Ipv4ListRoutingHelper list;
-  // list.Add (staticRouting, 0);
-  // list.Add (nixRouting, 10);
-  // internet.SetRoutingHelper(list);
 
   //=========== Creation of Node Containers ===========//
   //
   NodeContainer core[num_group]; // NodeContainer for core switches
   for (i = 0; i < num_group; i++) {
     core[i].Create(num_core);
-    // internet.Install (core[i]);
   }
   NodeContainer agg[num_pod]; // NodeContainer for aggregation switches
   for (i = 0; i < num_pod; i++) {
     agg[i].Create(num_agg);
-    // internet.Install (agg[i]);
   }
   NodeContainer edge[num_pod]; // NodeContainer for edge switches
   for (i = 0; i < num_pod; i++) {
     edge[i].Create(num_edge);
-    // internet.Install (edge[i]);
   }
-  // NodeContainer bridge[num_pod];                // NodeContainer for edge
-  // bridges
-  //      for (i=0; i<num_pod;i++){
-  //     bridge[i].Create (num_bridge);
-  //     internet.Install (bridge[i]);
-  // }
   NodeContainer host[num_pod][num_bridge]; // NodeContainer for hosts
   for (i = 0; i < k; i++) {
     for (j = 0; j < num_bridge; j++) {
       host[i][j].Create(num_host);
-      // internet.Install(host[i][j]);
     }
   }
 
@@ -185,21 +152,9 @@ int main(int argc, char *argv[]) {
   ApplicationContainer app[total_host];
 
   for (i = 0; i < total_host; i++) {
-  //for ( i = 0; i < 1; ++i ){
-    // Randomly select a server
-    podRand = rand() % num_pod + 0;
-    swRand = rand() % num_edge + 0;
-    hostRand = rand() % num_host + 0;
-    hostRand = hostRand + 2; // why add 2? due to bridge
-    podRand = 0;
-    swRand = 0;
-    hostRand = 1;
     char *add;
-    // add = toString(10, podRand, swRand, hostRand);
     int idx = rand() % total_host;
     add = toString(10, 0, 0, idx + 1);
-    //add = toString(10, 0, 0, 16);
-    // Initialize On/Off Application with addresss of server
     OnOffHelper oo =
         OnOffHelper("ns3::UdpSocketFactory",
                     Address(InetSocketAddress(Ipv4Address(add),
@@ -222,10 +177,6 @@ int main(int argc, char *argv[]) {
       rand3 = rand() % num_host + 0;
     } // to make sure that client and server are different
 
-    // rand1 = 0;
-    // rand2 = 0;
-    // rand3 = 1;
-
     // Install On/Off Application to the client
     NodeContainer onoff;
     onoff.Add(host[rand1][rand2].Get(rand3));
@@ -238,14 +189,6 @@ int main(int argc, char *argv[]) {
   //
   Ipv4AddressHelper address;
 
-  // Initialize PointtoPoint helper
-  //
-  // PointToPointHelper p2p;
-  //      p2p.SetDeviceAttribute ("DataRate", StringValue (dataRate));
-  //      p2p.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (delay)));
-
-  // Initialize Csma helper
-  //
   CsmaHelper csma;
   csma.SetChannelAttribute("DataRate", StringValue(dataRate));
   csma.SetChannelAttribute("Delay", TimeValue(MilliSeconds(delay)));
@@ -253,44 +196,36 @@ int main(int argc, char *argv[]) {
   //=========== Connect edge switches to hosts ===========//
   //
   NetDeviceContainer hostSw[num_pod][num_edge];
-  // NetDeviceContainer bridgeDevices[num_pod][num_bridge];
   Ptr<OpenFlowSwitchNetDevice> edgeSwtchs[num_pod][num_edge];
   NetDeviceContainer hostDevices[num_pod][num_edge];
-  //  Ipv4InterfaceContainer ipContainer[num_pod][num_edge];
 
   int cnt = 0;
   for (i = 0; i < num_pod; i++) {
     for (j = 0; j < num_edge; j++) {
-      // NetDeviceContainer link1 = csma.Install(NodeContainer (edge[i].Get(j),
-      // bridge[i].Get(j)));
-      // hostSw[i][j].Add(link1.Get(0));
-      // bridgeDevices[i][j].Add(link1.Get(1));
       NetDeviceContainer link1;
       for (h = 0; h < num_host; h++) {
         link1 = csma.Install(NodeContainer(edge[i].Get(j), host[i][j].Get(h)));
         hostSw[i][j].Add(link1.Get(0)); // duplication?
-        // NetDeviceContainer link2 = csma.Install (NodeContainer
-        // (host[i][j].Get(h), bridge[i].Get(j)));
-        // hostSw[i][j].Add(link2.Get(0));
-        // bridgeDevices[i][j].Add(link2.Get(1));
         hostDevices[i][j].Add(link1.Get(1));
 
         // Assign PMAC
-        Mac48Address pmac = Mac48Address(toPMAC(i + 1, j, h, 1));
-        // Ipv4Address ip = Ipv4Address(toString(10, 0, 0, ++cnt));
+        Mac48Address pmac = Mac48Address(toPMACAddress(i + 1, j, h, 1));
         string ip = toString(10, 0, 0, ++cnt);
         link1.Get(1)->SetAddress(pmac);
-        macIpMap.insert(pair<Mac48Address, string>(pmac, ip));
         ipMacMap.insert(pair<string, Mac48Address>(ip, pmac));
-        std::cout << host[i][j].Get(h) -> GetNDevices()<< " " << edge[i].Get(j) -> GetNDevices()<< std::endl;
+        std::cout << host[i][j].Get(h)->GetNDevices() << " "
+                  << edge[i].Get(j)->GetNDevices() << std::endl;
 
         link1.Get(0)->opMac = Mac48Address::ConvertFrom(
-                host[i][j].Get(h)->GetDevice( host[i][j].Get(h) -> GetNDevices() - 1 )->GetAddress());
+            host[i][j]
+                .Get(h)
+                ->GetDevice(host[i][j].Get(h)->GetNDevices() - 1)
+                ->GetAddress());
         link1.Get(1)->opMac = Mac48Address::ConvertFrom(
-            edge[i].Get(j)->GetDevice( edge[i].Get(j) -> GetNDevices() - 1 )->GetAddress());
-
-
-
+            edge[i]
+                .Get(j)
+                ->GetDevice(edge[i].Get(j)->GetNDevices() - 1)
+                ->GetAddress());
       }
       // add switch
       Ptr<Node> switchNode = edge[i].Get(j);
@@ -304,35 +239,22 @@ int main(int argc, char *argv[]) {
       edgeSwtchs[i][j]->m_pos = j;
       edgeSwtchs[i][j]->m_level = 0;
 
-
       for (h = 0; h < num_host; h++) {
         edgeSwtchs[i][j]->m_port_dir.insert(make_pair(h, false));
         edgeSwtchs[i][j]->AddSwitchPort(hostSw[i][j].Get(h));
       }
-      // BridgeHelper bHelper;
-      // bHelper.Install (bridge[i].Get(j), bridgeDevices[i][j]);
-      // Assign address
-      //      char *subnet;
-      //      subnet = toString(10, i, j, 0);
-      //      address.SetBase(subnet, "255.255.255.0");
-
-      //      ipContainer[i][j] = address.Assign(hostDevices[i][j]);
     }
   }
 
   for (i = 0; i < num_pod; i++) {
     for (j = 0; j < num_edge; j++) {
       edgeSwtchs[i][j]->IP_MAC_MAP = ipMacMap;
-      for( h = 0; h < num_host; h++) {
-          host[i][j].Get(0)->IP_MAC_MAP = ipMacMap;
+      for (h = 0; h < num_host; h++) {
+        host[i][j].Get(0)->IP_MAC_MAP = ipMacMap;
       }
     }
   }
 
-
-  //  // BridgeHelper bHelper;
-  //  // bHelper.Install (bridge[i].Get(j), bridgeDevices[i][j]);
-  //  // Assign address
   char *subnet;
   subnet = toString(10, 0, 0, 0);
   address.SetBase(subnet, "255.0.0.0");
@@ -342,7 +264,6 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < num_pod; ++i) {
     for (int j = 0; j < num_edge; ++j) {
       for (int h = 0; h < num_host; ++h) {
-        std::cout << "YY " << i << " " << j << " " << h << std::endl;
         terminalNetDevices.Add(hostDevices[i][j].Get(h));
         terminalNodes.Add(host[i][j].Get(h));
       }
@@ -351,50 +272,27 @@ int main(int argc, char *argv[]) {
   internet.Install(terminalNodes);
   address.Assign(terminalNetDevices);
 
-  for (map<string, Mac48Address>::iterator it = ipMacMap.begin();
-       it != ipMacMap.end(); it++) {
-    cout << it->first << " <=>" << it->second << endl;
-  }
-
   std::cout << "Finished connecting edge switches and hosts  "
             << "\n";
-  //  int32_t interface = host[1][1].Get(0)->GetObject<Ipv4>() ->
-  //  GetInterfaceForDevice( host[1][1].Get(0) -> GetDevice(1) );
-  //  Ipv4InterfaceAddress ipv4address = host[1][1].Get(0)->GetObject<Ipv4>() ->
-  //  GetAddress( interface, 0 );
-  //  std::cout << "YY" << host[1][1].Get(0) -> GetDevice(1) ->GetAddress() << "
-  //  " << ipv4address.GetLocal() << std::endl;
-  //  return 0;
 
   //=========== Connect aggregate switches to edge switches ===========//
   NetDeviceContainer ae[num_pod][num_agg][num_edge];
   Ptr<OpenFlowSwitchNetDevice> aggSwtchs[num_pod][num_agg];
-  // NetDeviceContainer aggSw[num_pod][num_agg];
-  // NetDeviceContainer edgeSw[num_pod][num_edge];
-  // Ipv4InterfaceContainer ipAeContainer[num_pod][num_agg][num_edge];
   for (i = 0; i < num_pod; i++) {
     for (j = 0; j < num_agg; j++) {
       for (h = 0; h < num_edge; h++) {
         ae[i][j][h] =
             csma.Install(NodeContainer(agg[i].Get(j), edge[i].Get(h)));
-        // int second_octet = i;
-        // int third_octet = j+(k/2);
-        // int fourth_octet;
-        // if (h==0) fourth_octet = 1;
-        // else fourth_octet = h*2+1;
-        // //Assign subnet
-        // char *subnet;
-        // subnet = toString(10, second_octet, third_octet, 0);
-        // //Assign base
-        // char *base;
-        // base = toString(0, 0, 0, fourth_octet);
-        // address.SetBase (subnet, "255.255.255.0",base);
-        // ipAeContainer[i][j][h] = address.Assign(ae[i][j][h]);
         ae[i][j][h].Get(0)->opMac = Mac48Address::ConvertFrom(
-                edge[i].Get(j)->GetDevice( edge[i].Get(j) -> GetNDevices() - 1 )->GetAddress());
+            edge[i]
+                .Get(j)
+                ->GetDevice(edge[i].Get(j)->GetNDevices() - 1)
+                ->GetAddress());
         ae[i][j][h].Get(1)->opMac = Mac48Address::ConvertFrom(
-            agg[i].Get(j)->GetDevice( agg[i].Get(j) -> GetNDevices() - 1 )->GetAddress());
-
+            agg[i]
+                .Get(j)
+                ->GetDevice(agg[i].Get(j)->GetNDevices() - 1)
+                ->GetAddress());
       }
       // add agg switch
       Ptr<Node> switchNode = agg[i].Get(j);
@@ -427,33 +325,22 @@ int main(int argc, char *argv[]) {
   //=========== Connect core switches to aggregate switches ===========//
   //
   NetDeviceContainer ca[num_group][num_core][num_pod];
-  // NetDeviceContainer coreSw[num_group][num_core][num_pod];
-  // Ipv4InterfaceContainer ipCaContainer[num_group][num_core][num_pod];
-  // int fourth_octet =1;
   Ptr<OpenFlowSwitchNetDevice> coreSwtchs[num_group][num_core];
   for (i = 0; i < num_group; i++) {
     for (j = 0; j < num_core; j++) {
-      // fourth_octet = 1;
       for (h = 0; h < num_pod; h++) {
         ca[i][j][h] =
             csma.Install(NodeContainer(core[i].Get(j), agg[h].Get(i)));
-        // coreSw[i][j][h].Add(ca[i][j][h].Get(0));
-        // int second_octet = k+i;
-        // int third_octet = j;
-        // //Assign subnet
-        // char *subnet;
-        // subnet = toString(10, second_octet, third_octet, 0);
-        // //Assign base
-        // char *base;
-        // base = toString(0, 0, 0, fourth_octet);
-        // address.SetBase (subnet, "255.255.255.0",base);
-        // ipCaContainer[i][j][h] = address.Assign(ca[i][j][h]);
-        // fourth_octet +=2;
         ca[i][j][h].Get(0)->opMac = Mac48Address::ConvertFrom(
-                agg[i].Get(j)->GetDevice( agg[i].Get(j) -> GetNDevices() - 1 )->GetAddress());
+            agg[i]
+                .Get(j)
+                ->GetDevice(agg[i].Get(j)->GetNDevices() - 1)
+                ->GetAddress());
         ca[i][j][h].Get(1)->opMac = Mac48Address::ConvertFrom(
-            core[i].Get(j)->GetDevice( core[i].Get(j) -> GetNDevices() - 1 )->GetAddress());
-
+            core[i]
+                .Get(j)
+                ->GetDevice(core[i].Get(j)->GetNDevices() - 1)
+                ->GetAddress());
       }
 
       // add switch
@@ -483,29 +370,25 @@ int main(int argc, char *argv[]) {
   }
   std::cout << "Finished connecting core switches and aggregation switches  "
             << "\n";
-  std::cout << "------------- "
-            << "\n";
 
   //=========== Start the simulation ===========//
   //
-
   std::cout << "Start Simulation.. "
             << "\n";
-  //total_host = 1;// DEBUG YY
-  double stop_time = 10;//100.0;
+  double stop_time = 10; // 100.0;
   for (i = 0; i < total_host; i++) {
     app[i].Start(Seconds(0.0));
     app[i].Stop(Seconds(stop_time));
   }
-  // Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
   // Calculate Throughput using Flowmonitor
   //
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor = flowmon.InstallAll();
+
   // Run simulation.
   Packet::EnablePrinting();
   NS_LOG_INFO("Run Simulation.");
-  Simulator::Stop(Seconds(stop_time + 1 ));
+  Simulator::Stop(Seconds(stop_time + 1));
   Simulator::Run();
 
   monitor->CheckForLostPackets();
@@ -513,50 +396,6 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Simulation finished "
             << "\n";
-  std::cout << edge[0].Get(0)->GetNDevices() << std::endl;
-  std::cout << edge[0].Get(0)->GetDevice(0)->GetAddress() << std::endl;
-  std::cout << edge[0].Get(0)->GetDevice(1)->GetAddress() << std::endl;
-  std::cout << edge[0].Get(0)->GetDevice(2)->GetAddress() << std::endl;
-  std::cout << edge[0].Get(0)->GetDevice(3)->GetAddress() << std::endl;
-  std::cout << edge[0].Get(0)->GetDevice(4)->GetAddress() << std::endl;
-//  std::cout << hostSw[0][0].Get(1)->GetAddress() << std::endl;
-//  std::cout << hostSw[0][1].Get(0)->GetAddress() << std::endl;
-//  std::cout << hostSw[0][1].Get(1)->GetAddress() << std::endl;
-
-  //std::cout << host[1][1].Get(0)->GetDevice(1)->GetAddress() << std::endl;
-  //  NodeContainer host[num_pod][num_bridge]; // NodeContainer for hosts
-  //  for (i = 0; i < k; i++) {
-  //    for (j = 0; j < num_bridge; j++) {
-  //      std::cout << (host[i][j].Get(0))->GetId() << std::endl;
-  //        if((host[i][j].Get(0))->GetId() == 26 )
-  //        {
-  //            std::cout << i << " " << j << " " << 0 << std::endl;
-  //            std::cout << host[i][j].Get(0) -> GetDevice( 0 ) ->GetAddress()
-  //            << std::endl;
-  //
-  //        }
-  //     std::cout << (host[i][j].Get(1))->GetId() << std::endl;
-  //     if((host[i][j].Get(1))->GetId() == 26 )
-  //        {
-  //             std::cout << i << " " << j <<" " << 1 << std::endl;
-  //            //std::cout << host[i][j].Get(1) -> GetDevice( 0 )
-  //            ->GetAddress() << std::endl;
-  //        }
-  //
-  //
-  //    }
-  ////std::cout << (edge[i].Get(0))->GetId() << std::endl;
-  ////std::cout << (edge[i].Get(1))->GetId() << std::endl;
-  ////std::cout << (agg[i].Get(0))->GetId() << std::endl;
-  ////std::cout << (agg[i].Get(1))->GetId() << std::endl;
-  ////if(i<2)
-  ////{
-  ////std::cout << (core[i].Get(0))->GetId() << std::endl;
-  ////std::cout << (core[i].Get(1))->GetId() << std::endl;
-  ////
-  ////}
-  //  }
-
   Simulator::Destroy();
   NS_LOG_INFO("Done.");
 
