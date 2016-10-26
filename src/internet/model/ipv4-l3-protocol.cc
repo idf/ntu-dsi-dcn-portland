@@ -763,6 +763,7 @@ Ipv4L3Protocol::SendRealOut (Ptr<Ipv4Route> route,
     {
       if (outInterface->IsUp ())
         {
+          std::cout << "YY ipv4_l3 Send to destination " << ipHeader.GetDestination () << "\n";
           NS_LOG_LOGIC ("Send to destination " << ipHeader.GetDestination ());
           if ( packet->GetSize () > outInterface->GetDevice ()->GetMtu () )
             {

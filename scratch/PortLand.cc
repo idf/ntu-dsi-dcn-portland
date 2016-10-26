@@ -183,7 +183,9 @@ int main(int argc, char *argv[]) {
   // Generate traffics for the simulation
   //
   ApplicationContainer app[total_host];
-  for (i = 0; i < total_host; i++) {
+
+  //for (i = 0; i < total_host; i++) {
+  for ( i = 0; i < 1; ++i ){
     // Randomly select a server
     // podRand = rand() % num_pod + 0;
     // swRand = rand() % num_edge + 0;
@@ -194,8 +196,8 @@ int main(int argc, char *argv[]) {
     // hostRand = 1;
     char *add;
     // add = toString(10, podRand, swRand, hostRand);
-    add = toString(10, 0, 0, rand() % total_host + 1);
-
+    ///YY add = toString(10, 0, 0, rand() % total_host + 1);
+    add = toString(10, 0, 0, 16);
     // Initialize On/Off Application with addresss of server
     OnOffHelper oo =
         OnOffHelper("ns3::UdpSocketFactory",
@@ -219,9 +221,9 @@ int main(int argc, char *argv[]) {
       rand3 = rand() % num_host + 0;
     } // to make sure that client and server are different
 
-    // rand1 = 0;
-    // rand2 = 0;
-    // rand3 = 1;
+     rand1 = 0;
+     rand2 = 0;
+     rand3 = 1;
 
     // Install On/Off Application to the client
     NodeContainer onoff;
@@ -279,12 +281,15 @@ int main(int argc, char *argv[]) {
         link1.Get(1)->SetAddress(pmac);
         macIpMap.insert(pair<Mac48Address, string>(pmac, ip));
         ipMacMap.insert(pair<string, Mac48Address>(ip, pmac));
-        // std::cout << i<< " " << j<< " "<<h << " " << host[i][j].Get(h) ->
-        // GetDevice(1) -> GetAddress()<< std::endl;
-        // std::cout << i<< " " << j<< " "<<h << " " << edge[i].Get(j) ->
-        // GetDevice(0) -> GetAddress() << std::endl;
-        host[i][j].Get(h)->AddNextHopMac(Mac48Address::ConvertFrom(
-            edge[i].Get(j)->GetDevice(0)->GetAddress()));
+        std::cout << host[i][j].Get(h) -> GetNDevices()<< " " << edge[i].Get(j) -> GetNDevices()<< std::endl;
+
+        link1.Get(0)->opMac = Mac48Address::ConvertFrom(
+                host[i][j].Get(h)->GetDevice( host[i][j].Get(h) -> GetNDevices() - 1 )->GetAddress());
+        link1.Get(1)->opMac = Mac48Address::ConvertFrom(
+            edge[i].Get(j)->GetDevice( edge[i].Get(j) -> GetNDevices() - 1 )->GetAddress());
+
+
+
       }
       // add switch
       Ptr<Node> switchNode = edge[i].Get(j);
@@ -297,7 +302,7 @@ int main(int argc, char *argv[]) {
       edgeSwtchs[i][j]->m_pod = i;
       edgeSwtchs[i][j]->m_pos = j;
       edgeSwtchs[i][j]->m_level = 0;
-      
+
 
       for (h = 0; h < num_host; h++) {
         edgeSwtchs[i][j]->m_port_dir.insert(make_pair(h, false));
@@ -313,7 +318,7 @@ int main(int argc, char *argv[]) {
       //      ipContainer[i][j] = address.Assign(hostDevices[i][j]);
     }
   }
-  
+
   for (i = 0; i < num_pod; i++) {
     for (j = 0; j < num_edge; j++) {
       edgeSwtchs[i][j]->IP_MAC_MAP = ipMacMap;
@@ -381,6 +386,11 @@ int main(int argc, char *argv[]) {
         // base = toString(0, 0, 0, fourth_octet);
         // address.SetBase (subnet, "255.255.255.0",base);
         // ipAeContainer[i][j][h] = address.Assign(ae[i][j][h]);
+        ae[i][j][h].Get(0)->opMac = Mac48Address::ConvertFrom(
+                edge[i].Get(j)->GetDevice( edge[i].Get(j) -> GetNDevices() - 1 )->GetAddress());
+        ae[i][j][h].Get(1)->opMac = Mac48Address::ConvertFrom(
+            agg[i].Get(j)->GetDevice( agg[i].Get(j) -> GetNDevices() - 1 )->GetAddress());
+
       }
       // add agg switch
       Ptr<Node> switchNode = agg[i].Get(j);
@@ -435,6 +445,11 @@ int main(int argc, char *argv[]) {
         // address.SetBase (subnet, "255.255.255.0",base);
         // ipCaContainer[i][j][h] = address.Assign(ca[i][j][h]);
         // fourth_octet +=2;
+        ca[i][j][h].Get(0)->opMac = Mac48Address::ConvertFrom(
+                agg[i].Get(j)->GetDevice( agg[i].Get(j) -> GetNDevices() - 1 )->GetAddress());
+        ca[i][j][h].Get(1)->opMac = Mac48Address::ConvertFrom(
+            core[i].Get(j)->GetDevice( core[i].Get(j) -> GetNDevices() - 1 )->GetAddress());
+
       }
 
       // add switch
@@ -472,9 +487,11 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Start Simulation.. "
             << "\n";
+  total_host = 1;// DEBUG YY
+  double stop_time = 2.0;//100.0;
   for (i = 0; i < total_host; i++) {
     app[i].Start(Seconds(0.0));
-    app[i].Stop(Seconds(100.0));
+    app[i].Stop(Seconds(stop_time));
   }
   // Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
   // Calculate Throughput using Flowmonitor
@@ -484,7 +501,7 @@ int main(int argc, char *argv[]) {
   // Run simulation.
   Packet::EnablePrinting();
   NS_LOG_INFO("Run Simulation.");
-  Simulator::Stop(Seconds(101.0));
+  Simulator::Stop(Seconds(stop_time + 1 ));
   Simulator::Run();
 
   monitor->CheckForLostPackets();
@@ -492,8 +509,17 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Simulation finished "
             << "\n";
-  std::cout << host[1][1].Get(0)->GetDevice(0)->GetAddress() << std::endl;
-  std::cout << host[1][1].Get(0)->GetDevice(1)->GetAddress() << std::endl;
+  std::cout << edge[0].Get(0)->GetNDevices() << std::endl;
+  std::cout << edge[0].Get(0)->GetDevice(0)->GetAddress() << std::endl;
+  std::cout << edge[0].Get(0)->GetDevice(1)->GetAddress() << std::endl;
+  std::cout << edge[0].Get(0)->GetDevice(2)->GetAddress() << std::endl;
+  std::cout << edge[0].Get(0)->GetDevice(3)->GetAddress() << std::endl;
+  std::cout << edge[0].Get(0)->GetDevice(4)->GetAddress() << std::endl;
+//  std::cout << hostSw[0][0].Get(1)->GetAddress() << std::endl;
+//  std::cout << hostSw[0][1].Get(0)->GetAddress() << std::endl;
+//  std::cout << hostSw[0][1].Get(1)->GetAddress() << std::endl;
+
+  //std::cout << host[1][1].Get(0)->GetDevice(1)->GetAddress() << std::endl;
   //  NodeContainer host[num_pod][num_bridge]; // NodeContainer for hosts
   //  for (i = 0; i < k; i++) {
   //    for (j = 0; j < num_bridge; j++) {

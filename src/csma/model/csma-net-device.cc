@@ -916,7 +916,7 @@ CsmaNetDevice::SendFrom (Ptr<Packet> packet, const Address& src, const Address& 
   NS_LOG_FUNCTION (packet << src << dest << protocolNumber);
   NS_LOG_LOGIC ("packet =" << packet);
   NS_LOG_LOGIC ("UID is " << packet->GetUid () << ")");
-
+  std::cout << "YY CsmaNetDevice SendFrom: src: " << src << " dest: " << dest << " packet: " << packet->GetUid() << std::endl;
   NS_ASSERT (IsLinkUp ());
 
   //

@@ -598,6 +598,11 @@ OpenFlowSwitchNetDevice::ReceiveFromDevice (Ptr<NetDevice> netdev, Ptr<const Pac
   NS_LOG_FUNCTION_NOARGS ();
   NS_LOG_INFO ("--------------------------------------------");
   NS_LOG_DEBUG ("UID is " << packet->GetUid ());
+  NS_LOG_DEBUG ("POD is " << m_pod);
+  NS_LOG_DEBUG ("POS is " << m_pos);
+  NS_LOG_DEBUG ("SID is " << m_switch_id);
+  NS_LOG_DEBUG ("LEVEL is " << m_level);
+
   std::cout << "YY ReceiveFromDevice " << src << " " << dst << " " << packet << std::endl;
 
   if (!m_promiscRxCallback.IsNull ())
@@ -608,12 +613,20 @@ OpenFlowSwitchNetDevice::ReceiveFromDevice (Ptr<NetDevice> netdev, Ptr<const Pac
   Mac48Address dst48 = Mac48Address::ConvertFrom (dst);
   NS_LOG_INFO ("Received packet from " << Mac48Address::ConvertFrom (src) << " looking for " << dst48);
   NS_LOG_INFO ("The packetType is " << packetType );
-  NS_LOG_INFO (PACKET_HOST);
+  NS_LOG_INFO (PACKET_OTHERHOST);
   for (size_t i = 0; i < m_ports.size (); i++)
     {
+          NS_LOG_INFO("YY FIND IT");
+          NS_LOG_INFO(dst48);
+          NS_LOG_INFO(m_address);
+          NS_LOG_INFO(i);
+          NS_LOG_INFO(m_ports[i].netdev -> GetAddress());
+          NS_LOG_INFO(netdev -> GetAddress() );
+
       if (m_ports[i].netdev == netdev)
         {
-          if (packetType == PACKET_HOST && dst48 == m_address)
+
+          if (packetType == PACKET_HOST || packetType == PACKET_OTHERHOST) //&& dst48 == m_address)
             {
                 ofi::SwitchPacketMetadata data;
                 data.packet = packet->Copy ();
@@ -635,7 +648,7 @@ OpenFlowSwitchNetDevice::ReceiveFromDevice (Ptr<NetDevice> netdev, Ptr<const Pac
             }
           else if (packetType == PACKET_BROADCAST || packetType == PACKET_MULTICAST || packetType == PACKET_OTHERHOST)
             {
-              if (packetType == PACKET_OTHERHOST && dst48 == m_address)
+              if (packetType == PACKET_OTHERHOST)// && dst48 == m_address)
                 {
                   m_rxCallback (this, packet, protocol, src);
                 }
@@ -741,6 +754,7 @@ OpenFlowSwitchNetDevice::OutputAll (uint32_t packet_uid, int in_port, bool flood
 void
 OpenFlowSwitchNetDevice::OutputPacket (uint32_t packet_uid, int out_port)
 {
+    std::cout << "YY OutputPacket " << packet_uid << " " << out_port << std::endl;
   if (out_port >= 0 && out_port < DP_MAX_PORTS)
     {
       ofi::Port& p = m_ports[out_port];

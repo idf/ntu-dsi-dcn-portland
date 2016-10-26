@@ -268,13 +268,13 @@ Ipv4Interface::Send (Ptr<Packet> p, Ipv4Address dest)
 //              found = arp->Lookup (p, dest, m_device, m_cache, &hardwareDestination);
 //            }
           found = true;
-          hardwareDestination = m_node -> GetNextHopMac();
+          hardwareDestination = Mac48Address("00:04:01:01:00:01");//m_device -> opMac;
         }
 
       if (found)
         {
           NS_LOG_LOGIC ("Address Resolved.  Send.");
-          std::cout << "YY ipv4-interface send to: " << hardwareDestination << std::endl;
+          std::cout << "YY ipv4-interface send to: " << hardwareDestination << " and from: " << m_device -> GetAddress() << std::endl;
           m_device->Send (p, hardwareDestination,
                           Ipv4L3Protocol::PROT_NUMBER);
         }
