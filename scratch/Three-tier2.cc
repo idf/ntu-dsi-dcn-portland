@@ -228,6 +228,7 @@ int
 // Generate traffics for the simulation
 //	
 	ApplicationContainer app[total_host];
+	srand(1);
 	for (i=0;i<total_host;i++){	
 	// Randomly select a server
 		podRand = rand() % num_pod + 0;
@@ -260,6 +261,8 @@ int
 		NodeContainer onoff;
 		onoff.Add(host[rand1][rand2].Get(rand3));
 	     	app[i] = oo.Install (onoff);
+	     std::cout << "From " << podRand << "." << swRand << "." << hostRand ;
+	     std::cout << " To " << rand1 << "." << rand2 << "." << rand3 << endl;
 	}
 	std::cout << "Finished creating On/Off traffic"<<"\n";
 
