@@ -270,6 +270,7 @@ int
 // Generate traffics for the simulation
 //	
 	ApplicationContainer app[total_host];
+	srand(1);
 	for (i=0;i<total_host;i++){	
 	// Randomly select a server
 		podRand = rand() % num_pod + 0;
@@ -412,7 +413,7 @@ int
 	std::cout << "Start Simulation.. "<<"\n";
 	for (i=0;i<total_host;i++){
 		app[i].Start (Seconds (0.0));
-  		app[i].Stop (Seconds (100.0));
+  		app[i].Stop (Seconds (10.0));
 	}
   	Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 // Calculate Throughput using Flowmonitor
@@ -422,7 +423,7 @@ int
 // Run simulation.
 //
   	NS_LOG_INFO ("Run Simulation.");
-  	Simulator::Stop (Seconds(101.0));
+  	Simulator::Stop (Seconds(11.0));
   	Simulator::Run ();
 
   	monitor->CheckForLostPackets ();
