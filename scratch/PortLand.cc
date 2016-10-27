@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
   int num_group = k / 2;          // number of group of core switches
   int num_core = (k / 2);         // number of core switch in a group
   int total_host = k * k * k / 4; // number of hosts in the entire network
-  char filename[] =
+  char filename[128] =
       "statistics/PortLand.xml"; // filename for Flow Monitor xml output file
 
   // Define variables for On/Off Application
@@ -102,13 +102,25 @@ int main(int argc, char *argv[]) {
   //
   int port = 9;
   int packetSize = 1024; // 1024 bytes
-  char dataRate_OnOff[] = "1Mbps";
+  char dataRate_OnOff[16] = "1Mbps";
   char maxBytes[] = "0"; // unlimited
 
   // Initialize parameters for Csma and PointToPoint protocol
   //
-  char dataRate[] = "1000Mbps"; // 1Gbps
+  char dataRate[16] = "1000Mbps"; // 1Gbps
   int delay = 0.001;            // 0.001 ms
+
+	if (argc == 5){
+		packetSize = std::atoi(argv[1]);
+		strcpy(dataRate_OnOff, argv[2]);
+		strcpy(dataRate, argv[3]);
+		strcpy(filename, argv[4]);
+	}
+
+	cout << "packetSize: " << packetSize << endl;
+	cout << "dataRate_OnOff: " << dataRate_OnOff << endl;
+	cout << "dataRate: " << dataRate << endl;
+	cout << "filename: " << filename << endl;
 
   // Output some useful information
   //
@@ -150,7 +162,7 @@ int main(int argc, char *argv[]) {
   // Generate traffics for the simulation
   //
   ApplicationContainer app[total_host];
-
+  srand(1);
   for (i = 0; i < total_host; i++) {
     char *add;
     int idx = rand() % total_host;
