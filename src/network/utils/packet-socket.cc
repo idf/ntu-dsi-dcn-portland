@@ -247,7 +247,6 @@ PacketSocket::Listen (void)
 int
 PacketSocket::Send (Ptr<Packet> p, uint32_t flags)
 {
-  //std::cout <<"YY  2 parameters\n";
   NS_LOG_FUNCTION (this << p << flags);
   if (m_state == STATE_OPEN ||
       m_state == STATE_BOUND)

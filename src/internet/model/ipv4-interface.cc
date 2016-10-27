@@ -198,7 +198,6 @@ Ipv4Interface::Send (Ptr<Packet> p, Ipv4Address dest)
     {
       return;
     }
-  std::cout << "YY 201\n";
   // Check for a loopback device
   if (DynamicCast<LoopbackNetDevice> (m_device))
     {
@@ -208,11 +207,9 @@ Ipv4Interface::Send (Ptr<Packet> p, Ipv4Address dest)
                       Ipv4L3Protocol::PROT_NUMBER);
       return;
     }
-  std::cout<<"YY 210\n";
   // is this packet aimed at a local interface ?
   for (Ipv4InterfaceAddressListCI i = m_ifaddrs.begin (); i != m_ifaddrs.end (); ++i)
     {
-        std::cout << dest << " " << *i << std::endl;
       if (dest == (*i).GetLocal ())
         {
           Ptr<Ipv4L3Protocol> ipv4 = m_node->GetObject<Ipv4L3Protocol> ();
@@ -225,11 +222,8 @@ Ipv4Interface::Send (Ptr<Packet> p, Ipv4Address dest)
           return;
         }
     }
-  std::cout<<"YY 227\n";
   if (m_device->NeedsArp ())
     {
-      //std::cout << "Need ARP\n";
-
       NS_LOG_LOGIC ("Needs ARP" << " " << dest);
       Ptr<ArpL3Protocol> arp = m_node->GetObject<ArpL3Protocol> ();
       Address hardwareDestination;
@@ -274,22 +268,18 @@ Ipv4Interface::Send (Ptr<Packet> p, Ipv4Address dest)
           ss>>string_dest;
 
           hardwareDestination = m_node->IP_MAC_MAP[string_dest];//Mac48Address("00:04:01:01:00:01");//m_device -> opMac;
-          std::cout << "######################"<<hardwareDestination <<std::endl;
         }
 
       if (found)
         {
           NS_LOG_LOGIC ("Address Resolved.  Send.");
-          std::cout << "YY ipv4-interface send to: " << hardwareDestination << " and from: " << m_device -> GetAddress() << std::endl;
           m_device->Send (p, hardwareDestination,
                           Ipv4L3Protocol::PROT_NUMBER);
         }
     }
   else
     {
-      std::cout << "Doesn't need ARP\n";
       NS_LOG_LOGIC ("Doesn't need ARP");
-      std::cout << m_device->GetBroadcast() << std::endl;
       m_device->Send (p, m_device->GetBroadcast (),
                       Ipv4L3Protocol::PROT_NUMBER);
     }
@@ -358,4 +348,3 @@ Ipv4Interface::RemoveAddress (uint32_t index)
 }
 
 } // namespace ns3
-

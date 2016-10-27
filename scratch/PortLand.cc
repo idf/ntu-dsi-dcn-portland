@@ -70,8 +70,8 @@ map<string, Mac48Address> ipMacMap;
 // Main function
 //
 int main(int argc, char *argv[]) {
-  LogComponentEnable("PortLand-Architecture", LOG_LEVEL_INFO);
-  LogComponentEnable("OpenFlowSwitchNetDevice", LOG_LEVEL_INFO);
+  // LogComponentEnable("PortLand-Architecture", LOG_LEVEL_INFO);
+  // LogComponentEnable("OpenFlowSwitchNetDevice", LOG_LEVEL_INFO);
 
   //=========== Define parameters based on value of k ===========//
   //
@@ -213,8 +213,6 @@ int main(int argc, char *argv[]) {
         string ip = toString(10, 0, 0, ++cnt);
         link1.Get(1)->SetAddress(pmac);
         ipMacMap.insert(pair<string, Mac48Address>(ip, pmac));
-        std::cout << host[i][j].Get(h)->GetNDevices() << " "
-                  << edge[i].Get(j)->GetNDevices() << std::endl;
       }
       // add switch
       Ptr<Node> switchNode = edge[i].Get(j);

@@ -282,7 +282,6 @@ UdpL4Protocol::Send (Ptr<Packet> packet,
                      uint16_t sport, uint16_t dport, Ptr<Ipv4Route> route)
 {
   NS_LOG_FUNCTION (this << packet << saddr << daddr << sport << dport << route);
-  std::cout<< saddr << " " << daddr << " " << sport << " " <<dport << " " << route << std::endl;
   UdpHeader udpHeader;
   if(Node::ChecksumEnabled ())
     {
@@ -312,4 +311,3 @@ UdpL4Protocol::GetDownTarget (void) const
 }
 
 } // namespace ns3
-

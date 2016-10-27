@@ -417,7 +417,6 @@ CsmaNetDevice::TransmitStart (void)
 
   NS_LOG_LOGIC ("m_currentPkt = " << m_currentPkt);
   NS_LOG_LOGIC ("UID = " << m_currentPkt->GetUid ());
-  //std::cout << "YY TransmitStart" << std::endl;
   //
   // Only transmit if the send side of net device is enabled
   //
@@ -654,7 +653,6 @@ CsmaNetDevice::Receive (Ptr<Packet> packet, Ptr<CsmaNetDevice> senderDevice)
 {
   NS_LOG_FUNCTION (packet << senderDevice);
   NS_LOG_LOGIC ("UID is " << packet->GetUid ());
-//  std::cout << "YY Receive " << std::endl;
   //
   // We never forward up packets that we sent.  Real devices don't do this since
   // their receivers are disabled during send, so we don't.
@@ -916,7 +914,6 @@ CsmaNetDevice::SendFrom (Ptr<Packet> packet, const Address& src, const Address& 
   NS_LOG_FUNCTION (packet << src << dest << protocolNumber);
   NS_LOG_LOGIC ("packet =" << packet);
   NS_LOG_LOGIC ("UID is " << packet->GetUid () << ")");
-  std::cout << "YY CsmaNetDevice SendFrom: src: " << src << " dest: " << dest << " packet: " << packet->GetUid() << std::endl;
   NS_ASSERT (IsLinkUp ());
 
   //

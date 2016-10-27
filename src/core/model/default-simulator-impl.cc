@@ -153,7 +153,6 @@ DefaultSimulatorImpl::Next (void) const
 void
 DefaultSimulatorImpl::Run (void)
 {
-//　std::cout << "YY Run run run\n";
   m_stop = false;
   while (!m_events->IsEmpty () && !m_stop)
     {
@@ -352,5 +351,3 @@ DefaultSimulatorImpl::GetContext (void) const
 }
 
 } // namespace ns3
-
-

@@ -27,14 +27,14 @@ NS_LOG_COMPONENT_DEFINE ("Ipv4InterfaceAddress");
 namespace ns3 {
 
 Ipv4InterfaceAddress::Ipv4InterfaceAddress ()
-  : m_scope (GLOBAL), 
+  : m_scope (GLOBAL),
     m_secondary (false)
 {
   NS_LOG_FUNCTION (this);
 }
 
 Ipv4InterfaceAddress::Ipv4InterfaceAddress (Ipv4Address local, Ipv4Mask mask)
-  : m_scope (GLOBAL), 
+  : m_scope (GLOBAL),
     m_secondary (false)
 {
   NS_LOG_FUNCTION (this);
@@ -53,77 +53,77 @@ Ipv4InterfaceAddress::Ipv4InterfaceAddress (const Ipv4InterfaceAddress &o)
   NS_LOG_FUNCTION (this);
 }
 
-void 
+void
 Ipv4InterfaceAddress::SetLocal (Ipv4Address local)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_local = local;
 }
 
-Ipv4Address 
+Ipv4Address
 Ipv4InterfaceAddress::GetLocal (void) const
 {
   NS_LOG_FUNCTION_NOARGS ();
-  return m_local; 
+  return m_local;
 }
 
-void 
-Ipv4InterfaceAddress::SetMask (Ipv4Mask mask) 
+void
+Ipv4InterfaceAddress::SetMask (Ipv4Mask mask)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_mask = mask;
 }
 
-Ipv4Mask 
+Ipv4Mask
 Ipv4InterfaceAddress::GetMask (void) const
 {
   NS_LOG_FUNCTION_NOARGS ();
   return m_mask;
 }
 
-void 
+void
 Ipv4InterfaceAddress::SetBroadcast (Ipv4Address broadcast)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_broadcast = broadcast;
 }
 
-Ipv4Address 
+Ipv4Address
 Ipv4InterfaceAddress::GetBroadcast (void) const
 {
   NS_LOG_FUNCTION_NOARGS ();
   return m_broadcast;
 }
 
-void 
+void
 Ipv4InterfaceAddress::SetScope (Ipv4InterfaceAddress::InterfaceAddressScope_e scope)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_scope = scope;
 }
 
-Ipv4InterfaceAddress::InterfaceAddressScope_e 
+Ipv4InterfaceAddress::InterfaceAddressScope_e
 Ipv4InterfaceAddress::GetScope (void) const
 {
   NS_LOG_FUNCTION_NOARGS ();
   return m_scope;
 }
 
-bool 
+bool
 Ipv4InterfaceAddress::IsSecondary (void) const
 {
   NS_LOG_FUNCTION_NOARGS ();
   return m_secondary;
 }
 
-void 
+void
 Ipv4InterfaceAddress::SetSecondary (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_secondary = true;
 }
 
-void 
+void
 Ipv4InterfaceAddress::SetPrimary (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
@@ -131,11 +131,11 @@ Ipv4InterfaceAddress::SetPrimary (void)
 }
 
 std::ostream& operator<< (std::ostream& os, const Ipv4InterfaceAddress &addr)
-{ 
+{
   os << "m_local=" << addr.GetLocal () << "; m_mask=" <<
   addr.GetMask () << "; m_broadcast=" << addr.GetBroadcast () << "; m_scope=" << addr.GetScope () <<
   "; m_secondary=" << addr.IsSecondary ();
   return os;
-} 
+}
 
 } // namespace ns3

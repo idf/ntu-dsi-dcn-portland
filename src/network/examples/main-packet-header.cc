@@ -8,7 +8,7 @@ using namespace ns3;
 
 /* A sample Header implementation
  */
-class MyHeader : public Header 
+class MyHeader : public Header
 {
 public:
 
@@ -30,7 +30,7 @@ private:
 
 MyHeader::MyHeader ()
 {
-  // we must provide a public default constructor, 
+  // we must provide a public default constructor,
   // implicit or explicit, but never private.
 }
 MyHeader::~MyHeader ()
@@ -85,12 +85,12 @@ MyHeader::Deserialize (Buffer::Iterator start)
   return 2;
 }
 
-void 
+void
 MyHeader::SetData (uint16_t data)
 {
   m_data = data;
 }
-uint16_t 
+uint16_t
 MyHeader::GetData (void) const
 {
   return m_data;
@@ -114,8 +114,6 @@ int main (int argc, char *argv[])
   p->AddHeader (sourceHeader);
 
   // print the content of my packet on the standard output.
-  p->Print (std::cout);
-  std::cout << std::endl;
 
   // you can now remove the header from the packet:
   MyHeader destinationHeader;

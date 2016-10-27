@@ -132,7 +132,6 @@ OnOffApplication::DoDispose (void)
 void OnOffApplication::StartApplication () // Called at time specified by Start
 {
   NS_LOG_FUNCTION_NOARGS ();
-  std::cout<< "YY StartApplication" << std::endl;
   // Create the socket if not already
   if (!m_socket)
     {
@@ -239,8 +238,6 @@ void OnOffApplication::ScheduleStopEvent ()
 
 void OnOffApplication::SendPacket ()
 {
-  std::cout << "============================" << std::endl;
-  std::cout << "YY SendPacket" << std::endl;
   NS_LOG_FUNCTION_NOARGS ();
   NS_LOG_LOGIC ("sending packet at " << Simulator::Now ());
   NS_ASSERT (m_sendEvent.IsExpired ());

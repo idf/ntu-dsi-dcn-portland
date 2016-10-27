@@ -223,7 +223,6 @@ Mac48Address Mac48Address::GetMulticast (Ipv6Address addr)
 
 std::ostream& operator<< (std::ostream& os, const Mac48Address & address)
 {
-  std::cout << "YY address output" << std::endl;
   uint8_t ad[6];
   address.CopyTo (ad);
 
