@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Linh Vu <linhvnl89@gmail.com>, Daji Wong <wong0204@e.ntu.edu.sg>
+ * Authors: Linh Vud <linhvnl89@gmail.com>, Daji Wong <wong0204@e.ntu.edu.sg>
  */
 
 #include <iostream>
@@ -125,9 +125,9 @@ int
 	int num_bridge = num_edge;	// number of bridge in a pod
 	int num_agg = (k/4);		// number of aggregation switch in a pod
 	int num_group = 1;		// number of group of core switches
-    int num_core = (k/2);		// number of core switch in a group
+    int num_core = (k/4);		// number of core switch in a group
 	int total_host = k*k*k/4;	// number of hosts in the entire network	
-	char filename [] = "statistics/Three-tier2-10s-1-1-1.xml";// filename for Flow Monitor xml output file
+	char filename [128] = "statistics/Three-tier2-10s-1-1-1.xml";// filename for Flow Monitor xml output file
 
 // Define variables for On/Off Application
 // These values will be used to serve the purpose that addresses of server and client are selected randomly
@@ -151,13 +151,27 @@ int
 //
 	int port = 9;
 	int packetSize = 1024;		// 1024 bytes
-	char dataRate_OnOff [] = "1Mbps";
+	char dataRate_OnOff [16] = "1Mbps";
 	char maxBytes [] = "0";		// unlimited
 
 // Initialize parameters for Csma and PointToPoint protocol
 //
-	char dataRate [] = "1000Mbps";	// 1Gbps
+	char dataRate [16] = "1000Mbps";	// 1Gbps
 	int delay = 0.001;		// 0.001 ms
+
+	if (argc == 5){
+		packetSize = std::atoi(argv[1]);
+		strcpy(dataRate_OnOff, argv[2]);
+		strcpy(dataRate, argv[3]);
+		strcpy(filename, argv[4]);
+	}
+
+	cout << "packetSize: " << packetSize << endl;
+	cout << "dataRate_OnOff: " << dataRate_OnOff << endl;
+	cout << "dataRate: " << dataRate << endl;
+	cout << "filename: " << filename << endl;
+
+
 
 	
 // Output some useful information

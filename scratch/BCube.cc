@@ -124,7 +124,7 @@ int
 	int n = 4;			// number of servers in one BCube;
 	int num_sw = pow (n,k);		// number of switch at each level (all levels have same number of switch) = n^k;
 	int num_host = num_sw*n;	// total number of host
-	char filename [] = "statistics/BCube-k1-10s-1-1-8.xml";	// filename for Flow Monitor xml output file
+	char filename [128] = "statistics/BCube-k1-10s-1-1-8.xml";	// filename for Flow Monitor xml output file
 
 // Initialize other variables
 //
@@ -146,13 +146,25 @@ int
 //
 	int port = 9;
 	int packetSize = 1024;		// 1024 bytes
-	char dataRate_OnOff [] = "1Mbps";
+	char dataRate_OnOff [16] = "1Mbps";
 	char maxBytes [] = "0";		// unlimited
 
 // Initialize parameters for Csma protocol
 //
-	char dataRate [] = "8000Mbps";	// 1Gbps
+	char dataRate [16] = "8000Mbps";	// 1Gbps
 	int delay = 0.001;		// 0.001 ms
+
+	if (argc == 5){
+		packetSize = std::atoi(argv[1]);
+		strcpy(dataRate_OnOff, argv[2]);
+		strcpy(dataRate, argv[3]);
+		strcpy(filename, argv[4]);
+	}
+
+	cout << "packetSize: " << packetSize << endl;
+	cout << "dataRate_OnOff: " << dataRate_OnOff << endl;
+	cout << "dataRate: " << dataRate << endl;
+	cout << "filename: " << filename << endl;
 
 // Output some useful information
 //	
