@@ -127,7 +127,7 @@ int
 	int num_group = 1;		// number of group of core switches
     int num_core = (k/2);		// number of core switch in a group
 	int total_host = k*k*k/4;	// number of hosts in the entire network	
-	char filename [] = "statistics/Three-tier2-10s-1-1-8.xml";// filename for Flow Monitor xml output file
+	char filename [] = "statistics/Three-tier2-10s-1-1-1.xml";// filename for Flow Monitor xml output file
 
 // Define variables for On/Off Application
 // These values will be used to serve the purpose that addresses of server and client are selected randomly
@@ -156,7 +156,7 @@ int
 
 // Initialize parameters for Csma and PointToPoint protocol
 //
-	char dataRate [] = "8000Mbps";	// 1Gbps
+	char dataRate [] = "1000Mbps";	// 1Gbps
 	int delay = 0.001;		// 0.001 ms
 
 	

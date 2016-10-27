@@ -207,6 +207,7 @@ int
 
 // Generate traffics for the simulation
 //
+	srand(1);
 	ApplicationContainer app[num_host];
 	for (i=0;i<num_host;i++){
 	// Randomly select a server
@@ -237,6 +238,9 @@ int
 		NodeContainer onoff;
 		onoff.Add(host.Get(randHost));
 	     	app[i] = oo.Install (onoff);
+        std::cout << "From " << levelRand << "." << swRand << "." << hostRand ;
+        std::cout << " To " << levelRand << "." << swRand << "." << randHost << endl;
+
 	}
 
 	std::cout << "Finished creating On/Off traffic"<<"\n";	
