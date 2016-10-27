@@ -545,7 +545,7 @@ Ipv4L3Protocol::Send (Ptr<Packet> packet,
                       uint8_t protocol,
                       Ptr<Ipv4Route> route)
 {
-  std::cout << "YY " << source << " " << destination << " " << protocol << " " << route << std::endl;
+  //std::cout << "YY " << source << " " << destination << " " << protocol << " " << route << std::endl;
   NS_LOG_FUNCTION (this << packet << source << destination << uint32_t (protocol) << route);
 
   Ipv4Header ipHeader;
@@ -557,7 +557,7 @@ Ipv4L3Protocol::Send (Ptr<Packet> packet,
     {
       ttl = tag.GetTtl ();
     }
-  std::cout << "YY 560" << std::endl;
+  //std::cout << "YY 560" << std::endl;
 
   // Handle a few cases:
   // 1) packet is destined to limited broadcast address
@@ -587,7 +587,7 @@ Ipv4L3Protocol::Send (Ptr<Packet> packet,
         }
       return;
     }
-  std::cout << "YY 590" << std::endl;
+  //std::cout << "YY 590" << std::endl;
 
   // 2) check: packet is destined to a subnet-directed broadcast address
   uint32_t ifaceIndex = 0;
@@ -613,7 +613,7 @@ Ipv4L3Protocol::Send (Ptr<Packet> packet,
             }
         }
     }
-  std::cout << "YY 616" << std::endl;
+  //std::cout << "YY 616" << std::endl;
 
   // 3) packet is not broadcast, and is passed in with a route entry
   //    with a valid Ipv4Address as the gateway
@@ -621,14 +621,14 @@ Ipv4L3Protocol::Send (Ptr<Packet> packet,
     {
       NS_LOG_LOGIC ("Ipv4L3Protocol::Send case 3:  passed in with route");
       ipHeader = BuildHeader (source, destination, protocol, packet->GetSize (), ttl, mayFragment);
-      std::cout << "YY 625" << std::endl;
+      //std::cout << "YY 625" << std::endl;
 
       int32_t interface = GetInterfaceForDevice (route->GetOutputDevice ());
       m_sendOutgoingTrace (ipHeader, packet, interface);
       SendRealOut (route, packet->Copy (), ipHeader);
       return;
     }
-  std::cout << "YY 629" << std::endl;
+  //std::cout << "YY 629" << std::endl;
 
   // 4) packet is not broadcast, and is passed in with a route entry but route->GetGateway is not set (e.g., on-demand)
   if (route && route->GetGateway () == Ipv4Address ())
@@ -639,7 +639,7 @@ Ipv4L3Protocol::Send (Ptr<Packet> packet,
       // to be queried).
       NS_FATAL_ERROR ("Ipv4L3Protocol::Send case 4: This case not yet implemented");
     }
-  std::cout << "YY 640" << std::endl;
+  //std::cout << "YY 640" << std::endl;
 
   // 5) packet is not broadcast, and route is NULL (e.g., a raw socket call)
   NS_LOG_LOGIC ("Ipv4L3Protocol::Send case 5:  passed in with no route " << destination);
@@ -666,7 +666,7 @@ Ipv4L3Protocol::Send (Ptr<Packet> packet,
       NS_LOG_WARN ("No route to host.  Drop.");
       m_dropTrace (ipHeader, packet, DROP_NO_ROUTE, m_node->GetObject<Ipv4> (), 0);
     }
-  std::cout << "YY 667" << std::endl;
+  //std::cout << "YY 667" << std::endl;
 
 }
 
@@ -731,7 +731,7 @@ Ipv4L3Protocol::SendRealOut (Ptr<Ipv4Route> route,
 
   if (!route->GetGateway ().IsEqual (Ipv4Address ("0.0.0.0")))
     {
-      //std::cout << route->GetGateway() << "*****" << std::endl;
+      ////std::cout << route->GetGateway() << "*****" << std::endl;
       if (outInterface->IsUp ())
         {
            NS_LOG_LOGIC ("Send to gateway " << route->GetGateway ());
@@ -763,7 +763,7 @@ Ipv4L3Protocol::SendRealOut (Ptr<Ipv4Route> route,
     {
       if (outInterface->IsUp ())
         {
-          std::cout << "YY ipv4_l3 Send to destination " << ipHeader.GetDestination () << "\n";
+          //std::cout << "YY ipv4_l3 Send to destination " << ipHeader.GetDestination () << "\n";
           NS_LOG_LOGIC ("Send to destination " << ipHeader.GetDestination ());
           if ( packet->GetSize () > outInterface->GetDevice ()->GetMtu () )
             {

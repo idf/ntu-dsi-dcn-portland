@@ -1,0 +1,28 @@
+# project noname (1.0) configured on Sun Oct 16 22:20:03 2016 by
+# waf 1.5.16 (abi 7, python 2070cf0 on linux2)
+# using ./waf configure
+#
+
+----------------------------------------
+Checking for program gcc or cc
+  find program=['gcc', 'cc'] paths=[] var='CC'
+  -> '/usr/bin/gcc'
+
+----------------------------------------
+Checking for program cpp
+  find program=['cpp'] paths=[] var='CPP'
+  -> '/usr/bin/cpp'
+
+----------------------------------------
+Checking for program ar
+  find program=['ar'] paths=[] var='AR'
+  -> '/usr/bin/ar'
+
+----------------------------------------
+Checking for program ranlib
+  find program=['ranlib'] paths=[] var='RANLIB'
+  -> '/usr/bin/ranlib'
+
+----------------------------------------
+Checking for gcc 
+ok 

@@ -110,7 +110,7 @@ int
 Socket::Send (Ptr<Packet> p)
 {
   NS_LOG_FUNCTION_NOARGS ();
-  std::cout << "YY Send Ptr<Packet>\n";
+  //std::cout << "YY Send Ptr<Packet>\n";
   return Send (p, 0);
 }
 

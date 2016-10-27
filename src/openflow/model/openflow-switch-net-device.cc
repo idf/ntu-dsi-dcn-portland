@@ -603,7 +603,7 @@ OpenFlowSwitchNetDevice::ReceiveFromDevice (Ptr<NetDevice> netdev, Ptr<const Pac
   NS_LOG_DEBUG ("SID is " << m_switch_id);
   NS_LOG_DEBUG ("LEVEL is " << m_level);
 
-  std::cout << "YY ReceiveFromDevice " << src << " " << dst << " " << packet << std::endl;
+  //std::cout << "YY ReceiveFromDevice " << src << " " << dst << " " << packet << std::endl;
 
   if (!m_promiscRxCallback.IsNull ())
     {
@@ -754,7 +754,7 @@ OpenFlowSwitchNetDevice::OutputAll (uint32_t packet_uid, int in_port, bool flood
 void
 OpenFlowSwitchNetDevice::OutputPacket (uint32_t packet_uid, int out_port)
 {
-    std::cout << "YY OutputPacket " << packet_uid << " " << out_port << std::endl;
+    //std::cout << "YY OutputPacket " << packet_uid << " " << out_port << std::endl;
   if (out_port >= 0 && out_port < DP_MAX_PORTS)
     {
       ofi::Port& p = m_ports[out_port];
@@ -985,12 +985,12 @@ OpenFlowSwitchNetDevice::SendErrorMsg (uint16_t type, uint16_t code, const void 
 }
 
 void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* buffer, uint32_t packet_uid, int port, bool send_to_controller) {
-  std::cout<<"FUCK!!!!!!!"<<key.flow.nw_dst<<std::endl;
+  //std::cout<<"FUCK!!!!!!!"<<key.flow.nw_dst<<std::endl;
   // For portland switch, we don't lookup flow table,
   // instead, we forwarding the packet according to its PMAC and current switch's location.
   NS_LOG_INFO("Portland switch: forwarding packet using PMAC and my location.");
 
-  //std::cout << "YY MAC src: " <<ntohl( key.flow.dl_src )<< " " << "dst" << ntohs( key.flow.dl_dst )<< std::endl;
+  ////std::cout << "YY MAC src: " <<ntohl( key.flow.dl_src )<< " " << "dst" << ntohs( key.flow.dl_dst )<< std::endl;
 
   // Get the destination PMAC of this package.
   // sw_flow_key my_key;
@@ -1000,8 +1000,8 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
   Mac48Address dl_dst_addr;
   Ipv4Address nw_dst_addr(ntohl(key.flow.nw_dst));
   Ipv4Address nw_src_addr(ntohl(key.flow.nw_src));
-  std::cout << "YY IP src: "  <<nw_src_addr<< " " << "dst" << nw_dst_addr<< std::endl;
-  std::cout<<"level: "<<m_level<<std::endl;
+  //std::cout << "YY IP src: "  <<nw_src_addr<< " " << "dst" << nw_dst_addr<< std::endl;
+  //std::cout<<"level: "<<m_level<<std::endl;
   uint8_t pmac[6];
 
   std::stringstream ss;
@@ -1009,17 +1009,17 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
   nw_dst_addr.Print(ss);
   std::string string_nw_dst;
   ss>>string_nw_dst;
-  std::cout<<"SSSSSSSSSSSSSSSSSString nw dst:"<<string_nw_dst<<std::endl;
+  //std::cout<<"SSSSSSSSSSSSSSSSSString nw dst:"<<string_nw_dst<<std::endl;
 
   if(IP_MAC_MAP.find(string_nw_dst) != IP_MAC_MAP.end()) {
     NS_LOG_INFO("Portland switch: can find the map from IP to PMAC.");
     dl_dst_addr = IP_MAC_MAP[string_nw_dst];
   } else {
     NS_LOG_INFO("Portland switch: can't find the map from IP to PMAC.");
-    //std::cout<<"FUCK!!!!!!!"<<key.flow.nw_dst<<std::endl;
+    ////std::cout<<"FUCK!!!!!!!"<<key.flow.nw_dst<<std::endl;
     dl_dst_addr.CopyFrom (key.flow.dl_dst);
     for(std::map<std::string, Mac48Address>::iterator itr = IP_MAC_MAP.begin(); itr != IP_MAC_MAP.end(); itr++) {
-      std::cout<<itr->first<< "<=>" << itr -> second <<std::endl;
+      //std::cout<<itr->first<< "<=>" << itr -> second <<std::endl;
 
     }
   }
@@ -1029,9 +1029,9 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
 
   dl_dst_addr.CopyTo(pmac);
 
-  std::cout<<"~~~~ Lets Print:~~~~~~\n";
+  //std::cout<<"~~~~ Lets Print:~~~~~~\n";
   for(int i = 0; i < 6; i++) {
-    std::cout<<(int)pmac[i]<<std::endl;
+    //std::cout<<(int)pmac[i]<<std::endl;
   }
 
   // Extract dst position info from PMAC.
@@ -1039,7 +1039,7 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
   int dst_pos = (int)pmac[2];
   int dst_port = (int)pmac[3];
 
-  std::cout<<"!!!!!!!!!!!!!!!!!dst_pod: "<<dst_pod<<" dst_pos"<<dst_pos<<" dst_port "<<dst_port<<std::endl;
+  //std::cout<<"!!!!!!!!!!!!!!!!!dst_pod: "<<dst_pod<<" dst_pos"<<dst_pos<<" dst_port "<<dst_port<<std::endl;
   // int dst_umid = (((int)pmac[4]) << 6 ) + (int)pmac[5]; // No use right now.
 
   // Construct the out-port for the package.

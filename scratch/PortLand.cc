@@ -79,8 +79,8 @@ int main(int argc, char *argv[]) {
   export NS_LOG=PortLand-Architecture=level_all
   export NS_LOG=OpenFlowSwitchNetDevice=level_all
   */
-  LogComponentEnable("PortLand-Architecture", LOG_LEVEL_INFO);
-  LogComponentEnable("OpenFlowSwitchNetDevice", LOG_LEVEL_INFO);
+  //LogComponentEnable("PortLand-Architecture", LOG_LEVEL_INFO);
+  //LogComponentEnable("OpenFlowSwitchNetDevice", LOG_LEVEL_INFO);
 
   //=========== Define parameters based on value of k ===========//
   //
@@ -282,7 +282,7 @@ int main(int argc, char *argv[]) {
         link1.Get(1)->SetAddress(pmac);
         macIpMap.insert(pair<Mac48Address, string>(pmac, ip));
         ipMacMap.insert(pair<string, Mac48Address>(ip, pmac));
-        std::cout << host[i][j].Get(h) -> GetNDevices()<< " " << edge[i].Get(j) -> GetNDevices()<< std::endl;
+        //std::cout << host[i][j].Get(h) -> GetNDevices()<< " " << edge[i].Get(j) -> GetNDevices()<< std::endl;
 
         link1.Get(0)->opMac = Mac48Address::ConvertFrom(
                 host[i][j].Get(h)->GetDevice( host[i][j].Get(h) -> GetNDevices() - 1 )->GetAddress());
@@ -342,7 +342,7 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < num_pod; ++i) {
     for (int j = 0; j < num_edge; ++j) {
       for (int h = 0; h < num_host; ++h) {
-        std::cout << "YY " << i << " " << j << " " << h << std::endl;
+        //std::cout << "YY " << i << " " << j << " " << h << std::endl;
         terminalNetDevices.Add(hostDevices[i][j].Get(h));
         terminalNodes.Add(host[i][j].Get(h));
       }
@@ -351,10 +351,10 @@ int main(int argc, char *argv[]) {
   internet.Install(terminalNodes);
   address.Assign(terminalNetDevices);
 
-  for (map<string, Mac48Address>::iterator it = ipMacMap.begin();
-       it != ipMacMap.end(); it++) {
-    cout << it->first << " <=>" << it->second << endl;
-  }
+  //for (map<string, Mac48Address>::iterator it = ipMacMap.begin();
+  //     it != ipMacMap.end(); it++) {
+  //  cout << it->first << " <=>" << it->second << endl;
+  //}
 
   std::cout << "Finished connecting edge switches and hosts  "
             << "\n";
@@ -492,7 +492,7 @@ int main(int argc, char *argv[]) {
   std::cout << "Start Simulation.. "
             << "\n";
   //total_host = 1;// DEBUG YY
-  double stop_time = 100.0;
+  double stop_time = 10;
   for (i = 0; i < total_host; i++) {
     app[i].Start(Seconds(0.0));
     app[i].Stop(Seconds(stop_time));
@@ -513,12 +513,12 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Simulation finished "
             << "\n";
-  std::cout << edge[0].Get(0)->GetNDevices() << std::endl;
-  std::cout << edge[0].Get(0)->GetDevice(0)->GetAddress() << std::endl;
-  std::cout << edge[0].Get(0)->GetDevice(1)->GetAddress() << std::endl;
-  std::cout << edge[0].Get(0)->GetDevice(2)->GetAddress() << std::endl;
-  std::cout << edge[0].Get(0)->GetDevice(3)->GetAddress() << std::endl;
-  std::cout << edge[0].Get(0)->GetDevice(4)->GetAddress() << std::endl;
+//  std::cout << edge[0].Get(0)->GetNDevices() << std::endl;
+//  std::cout << edge[0].Get(0)->GetDevice(0)->GetAddress() << std::endl;
+//  std::cout << edge[0].Get(0)->GetDevice(1)->GetAddress() << std::endl;
+//  std::cout << edge[0].Get(0)->GetDevice(2)->GetAddress() << std::endl;
+//  std::cout << edge[0].Get(0)->GetDevice(3)->GetAddress() << std::endl;
+//  std::cout << edge[0].Get(0)->GetDevice(4)->GetAddress() << std::endl;
 //  std::cout << hostSw[0][0].Get(1)->GetAddress() << std::endl;
 //  std::cout << hostSw[0][1].Get(0)->GetAddress() << std::endl;
 //  std::cout << hostSw[0][1].Get(1)->GetAddress() << std::endl;

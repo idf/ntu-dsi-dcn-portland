@@ -891,7 +891,7 @@ ExecuteActions (Ptr<OpenFlowSwitchNetDevice> swtch, uint64_t packet_uid, ofpbuf*
   uint8_t *p = (uint8_t *)actions;
 
   prev_port = -1;
-  std::cout << "YY ExecuteActions " << actions_len << std::endl;
+  //std::cout << "YY ExecuteActions " << actions_len << std::endl;
   if (actions_len == 0)
     {
       NS_LOG_INFO ("No actions set to this flow. Dropping packet.");
@@ -913,7 +913,7 @@ ExecuteActions (Ptr<OpenFlowSwitchNetDevice> swtch, uint64_t packet_uid, ofpbuf*
 
       if (ah->type == htons (OFPAT_OUTPUT))
         {
-            std::cout << "YY 916 " << len << std::endl;
+            //std::cout << "YY 916 " << len << std::endl;
 
           ofp_action_output *oa = (ofp_action_output *)p;
 
@@ -924,12 +924,12 @@ ExecuteActions (Ptr<OpenFlowSwitchNetDevice> swtch, uint64_t packet_uid, ofpbuf*
         }
       else
         {
-std::cout << "YY 927 " << prev_port << std::endl;
+//std::cout << "YY 927 " << prev_port << std::endl;
 
           uint16_t type = ntohs (ah->type);
           if (Action::IsValidType ((ofp_action_type)type)) // Execute a built-in OpenFlow action against 'buffer'.
             {
-std::cout << "YY 932 " << prev_port << std::endl;
+//std::cout << "YY 932 " << prev_port << std::endl;
 
               Action::Execute ((ofp_action_type)type, buffer, key, ah);
             }
@@ -939,18 +939,18 @@ std::cout << "YY 932 " << prev_port << std::endl;
               ExecuteVendor (buffer, key, ah);
             }
         }
-  std::cout << "YY 944 " << prev_port << std::endl;
+  //std::cout << "YY 944 " << prev_port << std::endl;
 
       p += len;
       actions_len -= len;
-std::cout << "Actions_len " << actions_len << std::endl;
+//std::cout << "Actions_len " << actions_len << std::endl;
     }
 
   if (prev_port != -1)
     {
       swtch->DoOutput (packet_uid, in_port, max_len, prev_port, ignore_no_fwd);
     }
-  std::cout << "YY ExecuteActions Done" << std::endl;
+  //std::cout << "YY ExecuteActions Done" << std::endl;
 
 }
 
@@ -1026,7 +1026,7 @@ ExecuteVPortActions (Ptr<OpenFlowSwitchNetDevice> swtch, uint64_t packet_uid, of
   /* The action list was already validated, so we can be a bit looser
    * in our sanity-checking. */
 
-  std::cout << "YY ExecuteVPortActions " << std::endl;
+  //std::cout << "YY ExecuteVPortActions " << std::endl;
 
   while (actions_len > 0)
     {
@@ -1058,7 +1058,7 @@ ExecuteVPortActions (Ptr<OpenFlowSwitchNetDevice> swtch, uint64_t packet_uid, of
     {
       swtch->DoOutput (packet_uid, in_port, max_len, prev_port, false);
     }
-  std::cout << "YY ExecuteVPortActions Done" << std::endl;
+  //std::cout << "YY ExecuteVPortActions Done" << std::endl;
 
 }
 
