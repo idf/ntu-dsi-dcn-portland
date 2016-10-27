@@ -225,7 +225,7 @@ int
 
 // Generate traffics for the simulation
 //	
-	srand(1);
+	srand(2);
 	ApplicationContainer app[total_host];
 	for (i=0;i<total_host;i++){	
 	// Randomly select a server
