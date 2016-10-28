@@ -220,10 +220,7 @@ int main(int argc, char *argv[]) {
       }
       // add switch
       Ptr<Node> switchNode = edge[i].Get(j);
-      Ptr<ns3::ofi::LearningController> controller =
-          CreateObject<ns3::ofi::LearningController>();
       edgeSwitchs[i][j] = new OpenFlowSwitchNetDevice();
-      edgeSwitchs[i][j]->SetController(controller);
       switchNode->AddDevice(edgeSwitchs[i][j]);
 
       edgeSwitchs[i][j]->m_pod = i;
@@ -259,10 +256,7 @@ int main(int argc, char *argv[]) {
       }
       // add agg switch
       Ptr<Node> switchNode = agg[i].Get(j);
-      Ptr<ns3::ofi::LearningController> controller =
-          CreateObject<ns3::ofi::LearningController>();
       aggSwitchs[i][j] = new OpenFlowSwitchNetDevice();
-      aggSwitchs[i][j]->SetController(controller);
       switchNode->AddDevice(aggSwitchs[i][j]);
 
       aggSwitchs[i][j]->m_pod = i;
@@ -300,10 +294,7 @@ int main(int argc, char *argv[]) {
 
       // add switch
       Ptr<Node> switchNode = core[i].Get(j);
-      Ptr<ns3::ofi::LearningController> controller =
-          CreateObject<ns3::ofi::LearningController>();
       coreSwitchs[i][j] = new OpenFlowSwitchNetDevice();
-      coreSwitchs[i][j]->SetController(controller);
       switchNode->AddDevice(coreSwitchs[i][j]);
 
       coreSwitchs[i][j]->m_pod = -1;
