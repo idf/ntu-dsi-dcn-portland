@@ -24,7 +24,6 @@ NS_LOG_COMPONENT_DEFINE("PortLand-Architecture");
 // Function to create address string from numbers
 //
 char *toString(int a, int b, int c, int d) {
-
   int first = a;
   int second = b;
   int third = c;
@@ -52,11 +51,11 @@ char *toString(int a, int b, int c, int d) {
 
 // Function to create MAC address string from numbers
 //
-char *toPMACAddress(int pod, int position, int port, int vmid) {
+char *toPMACAddress(int pod, int pos, int port, int vmid) {
   char *add = new char[18];
 
   if (pod <= 0xff && vmid <= 0xff) {
-    sprintf(add, "00:%02x:%02x:%02x:00:%02x", pod, position, port, vmid);
+    sprintf(add, "00:%02x:%02x:%02x:00:%02x", pod, pos, port, vmid);
   } else {
     std::cout << "Not implemented yet" << std::endl;
     exit(1);
@@ -65,14 +64,11 @@ char *toPMACAddress(int pod, int position, int port, int vmid) {
   return add;
 }
 
-map<string, Mac48Address> ipMacMap;
+map<Ipv4Address, Mac48Address> fabricManagerIpPmacMap;
 
 // Main function
 //
 int main(int argc, char *argv[]) {
-  // LogComponentEnable("PortLand-Architecture", LOG_LEVEL_INFO);
-  // LogComponentEnable("OpenFlowSwitchNetDevice", LOG_LEVEL_INFO);
-
   //=========== Define parameters based on value of k ===========//
   //
   int k = 4;                      // number of ports per switch
@@ -170,7 +166,7 @@ int main(int argc, char *argv[]) {
     OnOffHelper oo =
         OnOffHelper("ns3::UdpSocketFactory",
                     Address(InetSocketAddress(Ipv4Address(add),
-                                              port))); // ip address of server
+                                              port)));
     oo.SetAttribute("OnTime", RandomVariableValue(ExponentialVariable(1)));
     oo.SetAttribute("OffTime", RandomVariableValue(ExponentialVariable(1)));
     oo.SetAttribute("PacketSize", UintegerValue(packetSize));
@@ -197,10 +193,6 @@ int main(int argc, char *argv[]) {
   std::cout << "Finished creating On/Off traffic"
             << "\n";
 
-  // Inintialize Address Helper
-  //
-  Ipv4AddressHelper address;
-
   CsmaHelper csma;
   csma.SetChannelAttribute("DataRate", StringValue(dataRate));
   csma.SetChannelAttribute("Delay", TimeValue(MilliSeconds(delay)));
@@ -208,7 +200,7 @@ int main(int argc, char *argv[]) {
   //=========== Connect edge switches to hosts ===========//
   //
   NetDeviceContainer hostSw[num_pod][num_edge];
-  Ptr<OpenFlowSwitchNetDevice> edgeSwtchs[num_pod][num_edge];
+  Ptr<OpenFlowSwitchNetDevice> edgeSwitchs[num_pod][num_edge];
   NetDeviceContainer hostDevices[num_pod][num_edge];
 
   int cnt = 0;
@@ -222,61 +214,43 @@ int main(int argc, char *argv[]) {
 
         // Assign PMAC
         Mac48Address pmac = Mac48Address(toPMACAddress(i + 1, j, h, 1));
-        string ip = toString(10, 0, 0, ++cnt);
+        Ipv4Address ip = Ipv4Address(toString(10, 0, 0, ++cnt));
         link1.Get(1)->SetAddress(pmac);
-        ipMacMap.insert(pair<string, Mac48Address>(ip, pmac));
+        fabricManagerIpPmacMap.insert(pair<Ipv4Address, Mac48Address>(ip, pmac));
       }
       // add switch
       Ptr<Node> switchNode = edge[i].Get(j);
       Ptr<ns3::ofi::LearningController> controller =
           CreateObject<ns3::ofi::LearningController>();
-      edgeSwtchs[i][j] = new OpenFlowSwitchNetDevice();
-      edgeSwtchs[i][j]->SetController(controller);
-      switchNode->AddDevice(edgeSwtchs[i][j]);
+      edgeSwitchs[i][j] = new OpenFlowSwitchNetDevice();
+      edgeSwitchs[i][j]->SetController(controller);
+      switchNode->AddDevice(edgeSwitchs[i][j]);
 
-      edgeSwtchs[i][j]->m_pod = i;
-      edgeSwtchs[i][j]->m_pos = j;
-      edgeSwtchs[i][j]->m_level = 0;
+      edgeSwitchs[i][j]->m_pod = i;
+      edgeSwitchs[i][j]->m_pos = j;
+      edgeSwitchs[i][j]->m_level = 0;
 
       for (h = 0; h < num_host; h++) {
-        edgeSwtchs[i][j]->m_port_dir.insert(make_pair(h, false));
-        edgeSwtchs[i][j]->AddSwitchPort(hostSw[i][j].Get(h));
+        edgeSwitchs[i][j]->m_port_dir.insert(make_pair(h, false));
+        edgeSwitchs[i][j]->AddSwitchPort(hostSw[i][j].Get(h));
       }
     }
   }
 
   for (i = 0; i < num_pod; i++) {
     for (j = 0; j < num_edge; j++) {
-      edgeSwtchs[i][j]->IP_MAC_MAP = ipMacMap;
+      edgeSwitchs[i][j]->IP_MAC_MAP = fabricManagerIpPmacMap;
       for (h = 0; h < num_host; h++) {
-        host[i][j].Get(h)->IP_MAC_MAP = ipMacMap;
+        host[i][j].Get(h)->IP_MAC_MAP = fabricManagerIpPmacMap;
       }
     }
   }
-
-  char *subnet;
-  subnet = toString(10, 0, 0, 0);
-  address.SetBase(subnet, "255.0.0.0");
-  // incremental assigned
-  NodeContainer terminalNodes;
-  NetDeviceContainer terminalNetDevices;
-  for (int i = 0; i < num_pod; ++i) {
-    for (int j = 0; j < num_edge; ++j) {
-      for (int h = 0; h < num_host; ++h) {
-        terminalNetDevices.Add(hostDevices[i][j].Get(h));
-        terminalNodes.Add(host[i][j].Get(h));
-      }
-    }
-  }
-  internet.Install(terminalNodes);
-  address.Assign(terminalNetDevices);
-
   std::cout << "Finished connecting edge switches and hosts  "
             << "\n";
 
   //=========== Connect aggregate switches to edge switches ===========//
   NetDeviceContainer ae[num_pod][num_agg][num_edge];
-  Ptr<OpenFlowSwitchNetDevice> aggSwtchs[num_pod][num_agg];
+  Ptr<OpenFlowSwitchNetDevice> aggSwitchs[num_pod][num_agg];
   for (i = 0; i < num_pod; i++) {
     for (j = 0; j < num_agg; j++) {
       for (h = 0; h < num_edge; h++) {
@@ -287,24 +261,26 @@ int main(int argc, char *argv[]) {
       Ptr<Node> switchNode = agg[i].Get(j);
       Ptr<ns3::ofi::LearningController> controller =
           CreateObject<ns3::ofi::LearningController>();
-      aggSwtchs[i][j] = new OpenFlowSwitchNetDevice();
-      aggSwtchs[i][j]->SetController(controller);
-      switchNode->AddDevice(aggSwtchs[i][j]);
+      aggSwitchs[i][j] = new OpenFlowSwitchNetDevice();
+      aggSwitchs[i][j]->SetController(controller);
+      switchNode->AddDevice(aggSwitchs[i][j]);
 
-      aggSwtchs[i][j]->m_pod = i;
-      aggSwtchs[i][j]->m_pos = -1;
-      aggSwtchs[i][j]->m_level = 1;
-      aggSwtchs[i][j]->IP_MAC_MAP = ipMacMap;
+      aggSwitchs[i][j]->m_pod = i;
+      aggSwitchs[i][j]->m_pos = -1;
+      aggSwitchs[i][j]->m_level = 1;
+      aggSwitchs[i][j]->IP_MAC_MAP = fabricManagerIpPmacMap;
 
       for (h = 0; h < num_edge; h++) {
-        aggSwtchs[i][j]->m_port_dir.insert(make_pair(h, false));
-        aggSwtchs[i][j]->AddSwitchPort(ae[i][j][h].Get(0));
+        aggSwitchs[i][j]->m_port_dir.insert(make_pair(h, false));
+        aggSwitchs[i][j]->AddSwitchPort(ae[i][j][h].Get(0));
       }
     }
+  }
+  for (i = 0; i < num_pod; i++) {
     for (h = 0; h < num_edge; h++) {
       for (j = 0; j < num_agg; j++) {
-        edgeSwtchs[i][h]->m_port_dir.insert(make_pair(j + (k / 2), true));
-        edgeSwtchs[i][h]->AddSwitchPort(ae[i][j][h].Get(1)); // up arbitrary
+        edgeSwitchs[i][h]->m_port_dir.insert(make_pair(j + (k / 2), true));
+        edgeSwitchs[i][h]->AddSwitchPort(ae[i][j][h].Get(1)); // up arbitrary
       }
     }
   }
@@ -314,7 +290,7 @@ int main(int argc, char *argv[]) {
   //=========== Connect core switches to aggregate switches ===========//
   //
   NetDeviceContainer ca[num_group][num_core][num_pod];
-  Ptr<OpenFlowSwitchNetDevice> coreSwtchs[num_group][num_core];
+  Ptr<OpenFlowSwitchNetDevice> coreSwitchs[num_group][num_core];
   for (i = 0; i < num_group; i++) {
     for (j = 0; j < num_core; j++) {
       for (h = 0; h < num_pod; h++) {
@@ -326,29 +302,53 @@ int main(int argc, char *argv[]) {
       Ptr<Node> switchNode = core[i].Get(j);
       Ptr<ns3::ofi::LearningController> controller =
           CreateObject<ns3::ofi::LearningController>();
-      coreSwtchs[i][j] = new OpenFlowSwitchNetDevice();
-      coreSwtchs[i][j]->SetController(controller);
-      switchNode->AddDevice(coreSwtchs[i][j]);
+      coreSwitchs[i][j] = new OpenFlowSwitchNetDevice();
+      coreSwitchs[i][j]->SetController(controller);
+      switchNode->AddDevice(coreSwitchs[i][j]);
 
-      coreSwtchs[i][j]->m_pod = -1;
-      coreSwtchs[i][j]->m_pos = -1;
-      coreSwtchs[i][j]->m_level = 2;
-      coreSwtchs[i][j]->IP_MAC_MAP = ipMacMap;
+      coreSwitchs[i][j]->m_pod = -1;
+      coreSwitchs[i][j]->m_pos = -1;
+      coreSwitchs[i][j]->m_level = 2;
+      coreSwitchs[i][j]->IP_MAC_MAP = fabricManagerIpPmacMap;
 
       for (h = 0; h < num_pod; h++) {
-        coreSwtchs[i][j]->m_port_dir.insert(make_pair(h, false));
-        coreSwtchs[i][j]->AddSwitchPort(ca[i][j][h].Get(0));
+        coreSwitchs[i][j]->m_port_dir.insert(make_pair(h, false));
+        coreSwitchs[i][j]->AddSwitchPort(ca[i][j][h].Get(0));
       }
     }
+  }
+
+  for (i = 0; i < num_group; i++) {
     for (h = 0; h < num_pod; h++) {
       for (j = 0; j < num_core; j++) {
-        aggSwtchs[h][i]->m_port_dir.insert(make_pair(j + (k / 2), true));
-        aggSwtchs[h][i]->AddSwitchPort(ca[i][j][h].Get(1));
+        aggSwitchs[h][i]->m_port_dir.insert(make_pair(j + (k / 2), true));
+        aggSwitchs[h][i]->AddSwitchPort(ca[i][j][h].Get(1));
       }
     }
   }
   std::cout << "Finished connecting core switches and aggregation switches  "
             << "\n";
+
+  // Inintialize Address Helper
+  //
+  Ipv4AddressHelper address;
+
+  // Incrementally assign IP addresses to hosts
+  char *subnet;
+  subnet = toString(10, 0, 0, 0);
+  address.SetBase(subnet, "255.0.0.0");
+  NodeContainer hostNodeContainer;
+  NetDeviceContainer hostNetDeviceContainer;
+  for (int i = 0; i < num_pod; ++i) {
+    for (int j = 0; j < num_edge; ++j) {
+      for (int h = 0; h < num_host; ++h) {
+        hostNetDeviceContainer.Add(hostDevices[i][j].Get(h));
+        hostNodeContainer.Add(host[i][j].Get(h));
+      }
+    }
+  }
+  internet.Install(hostNodeContainer);
+  address.Assign(hostNetDeviceContainer);
 
   //=========== Start the simulation ===========//
   //
@@ -377,6 +377,5 @@ int main(int argc, char *argv[]) {
             << "\n";
   Simulator::Destroy();
   NS_LOG_INFO("Done.");
-
   return 0;
 }
