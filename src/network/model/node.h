@@ -56,7 +56,7 @@ class Address;
 class Node : public Object
 {
 public:
-    std::map<std::string, Mac48Address> IP_MAC_MAP;
+    std::map<Ipv4Address, Mac48Address> IP_MAC_MAP;
 
   static TypeId GetTypeId (void);
 

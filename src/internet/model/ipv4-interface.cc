@@ -262,12 +262,7 @@ Ipv4Interface::Send (Ptr<Packet> p, Ipv4Address dest)
 //              found = arp->Lookup (p, dest, m_device, m_cache, &hardwareDestination);
 //            }
           found = true;
-          std::stringstream ss;
-          dest.Print(ss);
-          std::string string_dest;
-          ss>>string_dest;
-
-          hardwareDestination = m_node->IP_MAC_MAP[string_dest];//Mac48Address("00:04:01:01:00:01");//m_device -> opMac;
+          hardwareDestination = m_node->IP_MAC_MAP[dest];//Mac48Address("00:04:01:01:00:01");//m_device -> opMac;
         }
 
       if (found)

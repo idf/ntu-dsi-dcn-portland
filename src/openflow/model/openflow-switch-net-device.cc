@@ -958,28 +958,16 @@ OpenFlowSwitchNetDevice::SendErrorMsg (uint16_t type, uint16_t code, const void 
 }
 
 void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* buffer, uint32_t packet_uid, int port, bool send_to_controller) {
-  // For portland switch, we don't lookup flow table,
-  // instead, we forwarding the packet according to its PMAC and current switch's location.
   NS_LOG_INFO("Portland switch: forwarding packet using PMAC and my location.");
-  // Get the destination PMAC of this package.
-  // sw_flow_key my_key;
-  // my_key.wildcards = 0;
-  // flow_extract (buffer, -1, &my_key.flow);   // The second par isn't important: we don't care about in-port.
 
   Mac48Address dl_dst_addr;
   Ipv4Address nw_dst_addr(ntohl(key.flow.nw_dst));
   Ipv4Address nw_src_addr(ntohl(key.flow.nw_src));
   uint8_t pmac[6];
 
-  std::stringstream ss;
-
-  nw_dst_addr.Print(ss);
-  std::string string_nw_dst;
-  ss>>string_nw_dst;
-
-  if(IP_MAC_MAP.find(string_nw_dst) != IP_MAC_MAP.end()) {
-    NS_LOG_INFO("Portland switch: can find the map from IP to PMAC.");
-    dl_dst_addr = IP_MAC_MAP[string_nw_dst];
+  // Mapping from IP to PMAC.
+  if(IP_MAC_MAP.count(nw_dst_addr)) {
+    dl_dst_addr = IP_MAC_MAP[nw_dst_addr];
   } else {
     NS_LOG_INFO("Portland switch: cannot find the map from IP to PMAC.");
     dl_dst_addr.CopyFrom (key.flow.dl_dst);
@@ -990,47 +978,47 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
   int dst_pod = (((int)pmac[0]) << 8 ) + (int)pmac[1] - 1;
   int dst_pos = (int)pmac[2];
   int dst_port = (int)pmac[3];
-  // int dst_umid = (((int)pmac[4]) << 6 ) + (int)pmac[5]; // No use right now.
-
-  // Construct the out-port for the package.
+  size_t port_size = m_port_dir.size();
   uint32_t output_port = -1;
-  if(m_level == 2) {     // Core switch.
+
+  // Forwarding logic.
+  if(m_level == 2) {  
     output_port = dst_pod;
 
-  } else if(m_level == 1) {    // Agg switch.
+  } else if(m_level == 1) {
     if(m_pod == dst_pod) {
-      // In the same pod. Just send it to the right edge switch.
       output_port = dst_pos;
 
     } else {
-      // Not in a same pod. Shoud send to core switch.
-      std::vector<int> potential_ports;
+      // When forwards to up port, we can do a load balance.
+      int counter = rand() % (port_size/2) + 1;
       for(std::map<int, bool>::iterator itr = m_port_dir.begin(); itr != m_port_dir.end(); itr++) {
         if(itr->second == true) {
-          potential_ports.push_back(itr->first);
+          if(--counter == 0) {
+            output_port = itr->first;
+            break;
+          }
         }
       }
-      size_t random_idx = rand() % potential_ports.size();
-      output_port = potential_ports[random_idx];  // Load balance here.
     }
 
-  } else if(m_level == 0) {     // Edge switch.
+  } else if(m_level == 0) {    
     if(dst_pod != m_pod || dst_pos != m_pos) {
-      // Not in a same pod or not in same edge switch. Shoud send to agg switch.
-      std::vector<int> potential_ports;
+      // When forwards to up port, we can do a load balance.
+      int counter = rand() % (port_size/2) + 1;
       for(std::map<int, bool>::iterator itr = m_port_dir.begin(); itr != m_port_dir.end(); itr++) {
         if(itr->second == true) {
-          potential_ports.push_back(itr->first);
+          if(--counter == 0) {
+            output_port = itr->first;
+            break;
+          }
         }
       }
-      size_t random_idx = rand() % potential_ports.size();
-      output_port = potential_ports[random_idx];  // Load balance here.
     } else {
-      // In same pod and same edge switch.
       output_port = dst_port;
     }
   } else {
-    NS_LOG_INFO("Portland switch: WTF the level of this switch is neither 0, 1 nor 2.");
+    NS_LOG_INFO("Portland switch: The level of the switch is wrong.");
   }
 
   // Create action.
@@ -1038,8 +1026,8 @@ void OpenFlowSwitchNetDevice::PortlandFlowTableLookup(sw_flow_key key, ofpbuf* b
   actions[0].type = htons (OFPAT_OUTPUT);
   actions[0].len = 16;
   actions[0].port = output_port;
-  NS_LOG_INFO(output_port);
-  // Forwarding package.
+  
+  NS_LOG_INFO("Portland switch: execute send package action.");
   ofi::ExecuteActions(this, packet_uid, buffer, &key, (ofp_action_header *)actions, 16, false);
 }
 

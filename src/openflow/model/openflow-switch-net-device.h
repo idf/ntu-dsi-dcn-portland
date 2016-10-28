@@ -99,7 +99,7 @@ public:
   std::map<int, bool> m_port_dir; // Port direction. True -> Up, False->Down
 
   static TypeId GetTypeId (void);
-  std::map<std::string, Mac48Address> IP_MAC_MAP;
+  std::map<Ipv4Address, Mac48Address> IP_MAC_MAP;
 
   /**
    * \name OpenFlowSwitchNetDevice Description Data
